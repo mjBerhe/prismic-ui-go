@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider, useRouteError } from "react-router
 
 import { useLoadUIConfig } from "./hooks/useLoadUIConfig";
 import Root from "./roots/root";
+import Valuation from "./roots/valuation";
 
 const container = document.getElementById("root");
 
@@ -35,11 +36,11 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
   },
-  // {
-  //   path: "/valuation",
-  //   element: <Valuation />,
-  //   errorElement: <ErrorPage />,
-  // },
+  {
+    path: "/valuation",
+    element: <Valuation />,
+    errorElement: <ErrorPage />,
+  },
   // {
   //   path: "/liability-analytics",
   //   element: <LiabilityAnalyics />,

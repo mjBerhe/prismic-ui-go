@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useUIConfigStore } from "../stores";
 import { UIConfig } from "../types/pages";
+import { ReadUIConfig } from "../../wailsjs/go/main/App";
 
 export const useLoadUIConfig = () => {
   const { setConfig } = useUIConfigStore();
@@ -9,10 +9,8 @@ export const useLoadUIConfig = () => {
   // loads ui_config file into global state
   const loadUIConfig = async () => {
     try {
-      const data = await invoke<UIConfig>("read_ui_config");
-      if (data) {
-        setConfig(data);
-      }
+      const config = await ReadUIConfig();
+      setConfig(config);
     } catch (err) {
       console.error("Failed to load ui config:", err);
     }
