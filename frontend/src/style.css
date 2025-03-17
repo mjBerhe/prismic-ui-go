@@ -1,24 +1,85 @@
-html {
-  background-color: rgba(27, 38, 54, 1);
-  text-align: center;
-  color: white;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  margin: 0;
-  color: white;
-  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-style: normal;
 }
 
 @font-face {
-  font-family: "Nunito";
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-UltraLight.woff2") format("woff2");
+  font-weight: 200;
   font-style: normal;
-  font-weight: 400;
-  src: local(""), url("assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
 }
 
-#app {
-  height: 100vh;
-  text-align: center;
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("./assets/fonts/Geist-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+main {
+  @apply bg-dark-900;
+  @apply text-white;
+  @apply font-geist;
+}
+
+body {
+  @apply bg-dark-900;
+  @apply text-white;
+  /* font-family: "Geist, sans-serif"; */
+}
+
+/* For WebKit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1); /* Track color (darker in dark mode) */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3); /* Thumb color */
+  border-radius: 6px; /* Rounded corners */
+  border: 3px solid rgba(24, 24, 27, 0.7); /* Padding around the thumb */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* Thin scrollbar */
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(24, 24, 27, 0.7); /* Thumb and track color */
 }
