@@ -42,6 +42,20 @@ export namespace main {
 	        this.baseSpreadAssumptionPath = source["baseSpreadAssumptionPath"];
 	    }
 	}
+	export class FileDialogOptions {
+	    SelectDirectory: boolean;
+	    DefaultDirectory?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FileDialogOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.SelectDirectory = source["SelectDirectory"];
+	        this.DefaultDirectory = source["DefaultDirectory"];
+	    }
+	}
 	export class MultiProjectSettings {
 	    PortfolioPath: string;
 	    sLiabilityPath: string;

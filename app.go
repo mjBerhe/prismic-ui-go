@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
@@ -170,4 +171,54 @@ func (a *App) GetLiabilityConfigs(folderPath string) ([]LiabilityConfigData, err
 	}
 
 	return configs, nil
+}
+
+type FileDialogOptions struct {
+	SelectDirectory  bool
+	DefaultDirectory *string
+}
+
+// OpenFileDialog opens a file dialog and returns the selected file or directory path
+func (a *App) OpenFileDialog(fileOptions FileDialogOptions) (string, error) {
+	options := runtime.OpenDialogOptions{
+		Title: "Select a File or Directory",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+			{
+				DisplayName: "Text Files (*.txt)",
+				Pattern:     "*.txt",
+			},
+		},
+	}
+
+	if fileOptions.DefaultDirectory != nil {
+		options.DefaultDirectory = *fileOptions.DefaultDirectory
+	}
+
+	var filePath string
+	var err error
+
+	// if selecting a directory
+	if fileOptions.SelectDirectory {
+		filePath, err = runtime.OpenDirectoryDialog(a.ctx, options)
+
+		if err != nil {
+			runtime.LogError(a.ctx, "Error opening file dialog: "+err.Error())
+			return "", err
+		}
+		runtime.LogInfo(a.ctx, "Selected folder: "+filePath)
+	} else {
+		filePath, err = runtime.OpenFileDialog(a.ctx, options)
+
+		if err != nil {
+			runtime.LogError(a.ctx, "Error opening file dialog: "+err.Error())
+			return "", err
+		}
+		runtime.LogInfo(a.ctx, "Selected file: "+filePath)
+	}
+
+	return filePath, nil
 }

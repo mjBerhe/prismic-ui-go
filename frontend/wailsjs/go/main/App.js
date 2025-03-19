@@ -10,6 +10,10 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function OpenFileDialog(arg1) {
+  return window['go']['main']['App']['OpenFileDialog'](arg1);
+}
+
 export function ReadUIConfig() {
   return window['go']['main']['App']['ReadUIConfig']();
 }

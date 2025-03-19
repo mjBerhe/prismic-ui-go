@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { open } from "@tauri-apps/plugin-dialog";
-
+import { OpenFileDialog } from "../../../wailsjs/go/main/App";
 import {
   Input,
   Listbox,
@@ -141,39 +140,42 @@ export const ValuationSettings: React.FC<{
     type: "file" | "folder",
     folderType?: FolderType
   ) => {
-    const filePath = await open({
-      multiple: false,
-      directory: type === "folder" ? true : false,
-      defaultPath: (folderType && defaultFolderPathMap[folderType]) || "",
-    });
-    const relativeFilePath = filePath && getRelativePath(palmFolderPath, filePath);
-    if (relativeFilePath) {
-      if (key === "scenarioFolderPath") {
-        setScenarioFolderPath(relativeFilePath);
+    try {
+      const result = await OpenFileDialog({
+        DefaultDirectory: folderType ? defaultFolderPathMap[folderType] : "",
+        SelectDirectory: type === "folder" ? true : false,
+      });
+      const relativeFilePath = result && getRelativePath(palmFolderPath, result);
+      if (relativeFilePath) {
+        if (key === "scenarioFolderPath") {
+          setScenarioFolderPath(relativeFilePath);
 
-        const scenarioFolderName = relativeFilePath.match(/scenarios\/([^/]+)/)?.[1];
-        if (scenarioFolderName) {
-          const newScenarioPaths = Object.fromEntries(
-            Object.entries(config).map(([key, value]) => {
-              // Only modify keys present in `scenarioKeys` and of type `string`
-              if (scenarioKeys.has(key) && typeof value === "string") {
-                return [
-                  key,
-                  value.replace(/(scenarios\/)[^/]+/, `$1${scenarioFolderName}`),
-                ];
-              }
-              return [key, value];
-            })
-          );
+          const scenarioFolderName = relativeFilePath.match(/scenarios\/([^/]+)/)?.[1];
+          if (scenarioFolderName) {
+            const newScenarioPaths = Object.fromEntries(
+              Object.entries(config).map(([key, value]) => {
+                // Only modify keys present in `scenarioKeys` and of type `string`
+                if (scenarioKeys.has(key) && typeof value === "string") {
+                  return [
+                    key,
+                    value.replace(/(scenarios\/)[^/]+/, `$1${scenarioFolderName}`),
+                  ];
+                }
+                return [key, value];
+              })
+            );
+            setConfig({
+              ...newScenarioPaths,
+            });
+          }
+        } else {
           setConfig({
-            ...newScenarioPaths,
+            [key]: type === "folder" ? relativeFilePath + "/" : relativeFilePath,
           });
         }
-      } else {
-        setConfig({
-          [key]: type === "folder" ? relativeFilePath + "/" : relativeFilePath,
-        });
       }
+    } catch (error) {
+      console.error("Error opening file dialog:", error);
     }
   };
 
@@ -283,7 +285,6 @@ export const ValuationSettings: React.FC<{
             <div className="flex gap-x-2 items-center">
               <Input
                 value={scenarioFolderPath}
-                onChange={() => {}}
                 disabled={true}
                 className={cn(
                   "w-full block rounded-lg border border-dark-600 bg-dark-800 py-1.5 px-3 text-sm/6 text-white pointer-events-auto",

@@ -6,4 +6,6 @@ export function GetLiabilityConfigs(arg1:string):Promise<Array<main.LiabilityCon
 
 export function Greet(arg1:string):Promise<string>;
 
+export function OpenFileDialog(arg1:main.FileDialogOptions):Promise<string>;
+
 export function ReadUIConfig():Promise<main.Config>;
