@@ -15,6 +15,8 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
+	app.GetLiabilityConfigs("C:/Users/mattberhe/pALM/prismic_ws_dll/Configs/valuation")
+
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "prismic-ui",

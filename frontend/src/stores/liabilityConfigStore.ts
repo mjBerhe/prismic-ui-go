@@ -10,7 +10,7 @@ type ConfigStore = {
 
 const useLiabilityConfigStore = create<ConfigStore>((set) => ({
   config: {
-    iProjectNum: "",
+    iProjectNum: 0,
     sFileName: "",
     sFolderName: "",
     MultiProjectSettings: {

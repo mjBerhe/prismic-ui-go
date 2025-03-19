@@ -1,5 +1,5 @@
 export type LiabilityConfig = {
-  iProjectNum: string;
+  iProjectNum: number;
   sFileName: string;
   sFolderName: string;
   MultiProjectSettings: {

@@ -91,8 +91,6 @@ const scenarioKeys = new Set([
   "sScenario_innerfile_down_liq_external_shock2",
 ]);
 
-const IS_DEMO = false;
-
 export const ValuationSettings: React.FC<{
   configPath: string;
   palmFolderPath: string;
@@ -241,9 +239,7 @@ export const ValuationSettings: React.FC<{
               <Input
                 value={config[x.key] || ""}
                 onChange={(e) => setConfig({ [x.key]: e.target.value })}
-                disabled={
-                  x.validationType === "file" || x.validationType === "folder" || IS_DEMO
-                }
+                disabled={x.validationType === "file" || x.validationType === "folder"}
                 className={cn(
                   "w-full block rounded-lg border border-dark-600 bg-dark-800 py-1.5 px-3 text-sm/6 text-white pointer-events-auto",
                   "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25 disabled:opacity-80"
@@ -258,7 +254,7 @@ export const ValuationSettings: React.FC<{
                       x.folderType
                     )
                   }
-                  className={cn("cursor-pointer w-[48px]", IS_DEMO && "text-gray-500")}
+                  className={cn("cursor-pointer w-[48px]")}
                 />
               ) : (
                 <p className="w-[48px]"></p>
@@ -298,7 +294,7 @@ export const ValuationSettings: React.FC<{
                 onClick={() =>
                   handleSelectFile("scenarioFolderPath", "folder", "input/scenarios")
                 }
-                className={cn("cursor-pointer w-[48px]", IS_DEMO && "text-gray-500")}
+                className={cn("cursor-pointer w-[48px]")}
               />
             </div>
           </div>

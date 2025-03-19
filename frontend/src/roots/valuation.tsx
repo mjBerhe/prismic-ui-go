@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import JSON5 from "json5";
-import { cleanJsonString, normalizePathString, resolvePath } from "../utils/output";
+import {
+  cleanJsonString,
+  extractFileName,
+  normalizePathString,
+  resolvePath,
+} from "../utils/output";
 
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
@@ -10,6 +15,8 @@ import { LiabilityConfig } from "../types/pages";
 import { ValuationSettings } from "../components/valuation/valuationSettings";
 import { ValuationOutput } from "../components/valuation/valuationOutput";
 import { useLiabilityConfigStore, useUIConfigStore } from "../stores";
+
+import { GetLiabilityConfigs } from "../../wailsjs/go/main/App";
 
 export type ConfigOption = {
   id: number;
@@ -58,37 +65,21 @@ const Valuation: React.FC = () => {
             normalizedPalmFolderPath,
             uiConfig.pathToValuationConfigs || "../../../Configs/valuation"
           );
-          const configFolderData = await invoke<Record<string, string>>(
-            "find_liability_configs",
-            {
-              folderPath: configFolder,
-            }
-          );
 
-          const cleanedConfigs = Object.fromEntries(
-            Object.entries(configFolderData).map(([key, val]) => [
-              key,
-              JSON5.parse(cleanJsonString(val)) as LiabilityConfig,
-            ])
-          );
-          const [firstEntry, configJson] = Object.entries(cleanedConfigs)[0];
-          // set current config to first option by default
-          if (firstEntry && configJson) {
-            const configPath = resolvePath(configFolder, firstEntry);
+          const configFolderData = await GetLiabilityConfigs(configFolder);
 
-            setConfigPath(configPath);
-            setConfig(configJson);
-          }
-
-          // set all config options
-          const configOptions = Object.entries(cleanedConfigs).map(([key, value], i) => ({
+          const configOptions = configFolderData.map((item, i) => ({
             id: i,
-            name: key,
-            configJson: value,
-            path: resolvePath(configFolder, key),
+            name: extractFileName(item.DirectoryName),
+            configJson: item.ConfigData,
+            path: item.DirectoryName,
           }));
-
           setConfigOptions(configOptions);
+
+          if (configOptions[0]) {
+            setConfigPath(configOptions[0].path);
+            setConfig(configOptions[0].configJson);
+          }
         } catch (err) {
           setError(err as string);
           console.error(err);

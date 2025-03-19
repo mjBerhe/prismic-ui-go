@@ -42,6 +42,122 @@ export namespace main {
 	        this.baseSpreadAssumptionPath = source["baseSpreadAssumptionPath"];
 	    }
 	}
+	export class MultiProjectSettings {
+	    PortfolioPath: string;
+	    sLiabilityPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MultiProjectSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.PortfolioPath = source["PortfolioPath"];
+	        this.sLiabilityPath = source["sLiabilityPath"];
+	    }
+	}
+	export class LiabilityConfig {
+	    iProjectNum: number;
+	    sFileName: string;
+	    sFolderName: string;
+	    MultiProjectSettings: MultiProjectSettings;
+	    sCashPath: string;
+	    asset_path: string;
+	    sOutterLoopScenario: string;
+	    sInnerLoopScenario: string;
+	    sLiabilityPath: string;
+	    sPlanSpecPath: string;
+	    sofr_outer: string;
+	    sofr_inner: string;
+	    sofr_inner_u25: string;
+	    sofr_inner_d25: string;
+	    sofr_inner_liqup: string;
+	    sofr_inner_liqdown: string;
+	    sofr_inner_liqup_u25: string;
+	    sofr_inner_liqup_d25: string;
+	    sofr_inner_liqdown_u25: string;
+	    sofr_inner_liqdown_d25: string;
+	    sVM20_JsonPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new LiabilityConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.iProjectNum = source["iProjectNum"];
+	        this.sFileName = source["sFileName"];
+	        this.sFolderName = source["sFolderName"];
+	        this.MultiProjectSettings = this.convertValues(source["MultiProjectSettings"], MultiProjectSettings);
+	        this.sCashPath = source["sCashPath"];
+	        this.asset_path = source["asset_path"];
+	        this.sOutterLoopScenario = source["sOutterLoopScenario"];
+	        this.sInnerLoopScenario = source["sInnerLoopScenario"];
+	        this.sLiabilityPath = source["sLiabilityPath"];
+	        this.sPlanSpecPath = source["sPlanSpecPath"];
+	        this.sofr_outer = source["sofr_outer"];
+	        this.sofr_inner = source["sofr_inner"];
+	        this.sofr_inner_u25 = source["sofr_inner_u25"];
+	        this.sofr_inner_d25 = source["sofr_inner_d25"];
+	        this.sofr_inner_liqup = source["sofr_inner_liqup"];
+	        this.sofr_inner_liqdown = source["sofr_inner_liqdown"];
+	        this.sofr_inner_liqup_u25 = source["sofr_inner_liqup_u25"];
+	        this.sofr_inner_liqup_d25 = source["sofr_inner_liqup_d25"];
+	        this.sofr_inner_liqdown_u25 = source["sofr_inner_liqdown_u25"];
+	        this.sofr_inner_liqdown_d25 = source["sofr_inner_liqdown_d25"];
+	        this.sVM20_JsonPath = source["sVM20_JsonPath"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class LiabilityConfigData {
+	    DirectoryName: string;
+	    ConfigData: LiabilityConfig;
+	
+	    static createFrom(source: any = {}) {
+	        return new LiabilityConfigData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.DirectoryName = source["DirectoryName"];
+	        this.ConfigData = this.convertValues(source["ConfigData"], LiabilityConfig);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 

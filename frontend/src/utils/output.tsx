@@ -166,3 +166,9 @@ export const resolvePath = (basePath: string, relativePath: string): string => {
 
   return baseParts.join("/");
 };
+
+export const extractFileName = (filePath: string): string => {
+  const separator = filePath.includes("\\") ? "\\" : "/";
+  const parts = filePath.split(separator);
+  return parts[parts.length - 1];
+};

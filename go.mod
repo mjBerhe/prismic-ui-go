@@ -1,10 +1,13 @@
 module prismic-ui
 
-go 1.21
+go 1.23
 
 toolchain go1.23.5
 
-require github.com/wailsapp/wails/v2 v2.9.2
+require (
+	github.com/wailsapp/wails/v2 v2.9.2
+	github.com/yosuke-furukawa/json5 v0.1.1
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
