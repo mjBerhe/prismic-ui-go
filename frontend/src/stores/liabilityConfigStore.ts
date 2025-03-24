@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import type { LiabilityConfig } from "../types/pages";
+import { main } from "../../wailsjs/go/models";
 
 type ConfigStore = {
-  config: LiabilityConfig;
+  config: Partial<main.LiabilityConfig>;
   configPath: string;
-  setConfig: (newConfig: Partial<LiabilityConfig>) => void;
+  setConfig: (newConfig: Partial<main.LiabilityConfig>) => void;
   setConfigPath: (path: string) => void;
 };
 
@@ -12,11 +12,6 @@ const useLiabilityConfigStore = create<ConfigStore>((set) => ({
   config: {
     iProjectNum: 0,
     sFileName: "",
-    sFolderName: "",
-    MultiProjectSettings: {
-      PortfolioPath: "",
-      sLiabilityPath: "",
-    },
     sCashPath: "",
     asset_path: "",
     sOutterLoopScenario: "",
@@ -42,6 +37,7 @@ const useLiabilityConfigStore = create<ConfigStore>((set) => ({
       config: {
         ...state.config,
         ...newConfig,
+        balts_bmareturn: "true",
       },
     })),
   setConfigPath: (path) =>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { OpenFileDialog } from "../../../wailsjs/go/main/App";
+
 import {
   Input,
   Listbox,
@@ -19,12 +20,7 @@ import { getRelativePath } from "../../utils/output";
 import { ConfigOption } from "../../roots/valuation";
 import { useLiabilityConfigStore, useUIConfigStore } from "../../stores";
 
-type ConfigInput =
-  | "sFileName"
-  | "sCashPath"
-  | "sPlanSpecPath"
-  | "sVM20_JsonPath"
-  | "asset_path";
+type ConfigInput = "sFileName" | "sCashPath" | "sPlanSpecPath" | "sLiabilityPath";
 
 type FolderType = "input" | "input/liability" | "input/scenarios" | "output";
 
@@ -49,19 +45,11 @@ const configInputs: {
     description: "Folder path where the output files will be saved",
   },
   {
-    key: "asset_path",
-    displayName: "Initial Portfolio",
+    key: "sLiabilityPath",
+    displayName: "Inforce File",
     validationType: "file",
-    folderType: "input",
-    description: "Initial asset tape",
-  },
-  {
-    key: "sVM20_JsonPath",
-    displayName: "Spread, Default Cost, Investment Expense",
-    validationType: "file",
-    folderType: "input",
-    description:
-      "File containing credit spread (current and long term), default expense, and investment expense",
+    folderType: "input/liability",
+    description: "Liability seriatum data",
   },
 ];
 
@@ -90,7 +78,7 @@ const scenarioKeys = new Set([
   "sScenario_innerfile_down_liq_external_shock2",
 ]);
 
-export const ValuationSettings: React.FC<{
+export const LiabilityAnalyticsSettings: React.FC<{
   configPath: string;
   palmFolderPath: string;
   isPalmRunning?: boolean;
@@ -282,9 +270,11 @@ export const ValuationSettings: React.FC<{
                 </Tooltip>
               </TooltipProvider>
             </div>
+
             <div className="flex gap-x-2 items-center">
               <Input
                 value={scenarioFolderPath}
+                onChange={() => {}}
                 disabled={true}
                 className={cn(
                   "w-full block rounded-lg border border-dark-600 bg-dark-800 py-1.5 px-3 text-sm/6 text-white pointer-events-auto",

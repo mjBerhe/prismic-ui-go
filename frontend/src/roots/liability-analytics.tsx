@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
 import { GetLiabilityConfigs } from "../../wailsjs/go/main/App";
-import { extractFileName, normalizePathString, resolvePath } from "../utils/output";
+import {
+  cleanJsonString,
+  normalizePathString,
+  resolvePath,
+  extractFileName,
+} from "../utils/output";
 
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
 import { RunPalm } from "../components/runPalm";
-import { ValuationSettings } from "../components/valuation/valuationSettings";
-import { ValuationOutput } from "../components/valuation/valuationOutput";
 import { useLiabilityConfigStore, useUIConfigStore } from "../stores";
-import { main } from "../../wailsjs/go/models";
+import type { ConfigOption } from "./valuation";
+import { LiabilityAnalyticsSettings } from "../components/liability-analytics/liabilityAnalyticsSettings";
+import { LiabilityAnalyticsOutput } from "../components/liability-analytics/liabilityAnalyticsOutput";
 
-export type ConfigOption = {
-  id: number;
-  name: string;
-  configJson: main.LiabilityConfig | undefined;
-  path: string;
-};
-
-const Valuation: React.FC = () => {
+const LiabilityAnalyics: React.FC = () => {
   // TODO: add loading and error states
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +53,7 @@ const Valuation: React.FC = () => {
           // finding all available configs
           const configFolder = resolvePath(
             normalizedPalmFolderPath,
-            uiConfig.pathToValuationConfigs || "../../../Configs/valuation"
+            uiConfig.pathToLiabilityConfigs || "../../../Configs/liability_analytics"
           );
 
           const configFolderData = await GetLiabilityConfigs(configFolder);
@@ -66,11 +64,6 @@ const Valuation: React.FC = () => {
             configJson: item.ConfigData,
             path: item.DirectoryName,
           }));
-          for (let config of configOptions) {
-            console.log(config.path);
-            // console.log(config.configJson);
-            // console.log(config.configJson.balts_bmareturn);
-          }
           setConfigOptions(configOptions);
 
           if (configOptions[0]) {
@@ -94,12 +87,12 @@ const Valuation: React.FC = () => {
   return (
     <PageContainer>
       <div className="py-8 flex flex-col justify-center">
-        <PageHeader title="Valuation" />
+        <PageHeader title="Liability Analytics" />
 
         <div className="flex w-full mt-8 gap-x-6">
           <div className="w-1/2 flex flex-col gap-y-8">
             {configOptions?.length > 0 && (
-              <ValuationSettings
+              <LiabilityAnalyticsSettings
                 configPath={configPath}
                 palmFolderPath={palmFolderPath}
                 configOptions={configOptions}
@@ -112,7 +105,7 @@ const Valuation: React.FC = () => {
               <RunPalm
                 palmFolderPath={palmFolderPath}
                 palmConfigPath={configPath}
-                moduleType="valuation"
+                moduleType="liability_analytics"
               />
             )}
           </div>
@@ -120,7 +113,7 @@ const Valuation: React.FC = () => {
 
         <div className="mt-8">
           {exportPath && exportPath !== "/" && (
-            <ValuationOutput exportFolderPath={exportPath} />
+            <LiabilityAnalyticsOutput exportFolderPath={exportPath} />
           )}
         </div>
       </div>
@@ -128,4 +121,4 @@ const Valuation: React.FC = () => {
   );
 };
 
-export default Valuation;
+export default LiabilityAnalyics;

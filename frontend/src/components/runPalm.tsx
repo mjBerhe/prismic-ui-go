@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
+import { ExecutePalm, GetFilenames, WriteJsonFile } from "../../wailsjs/go/main/App";
+import { EventsOn } from "../../wailsjs/runtime";
 
 import { Button } from "./ui/Button";
 import { LoadingIcon } from "./svgs/LoadingIcon";
-import { Check, CircleX } from "lucide-react";
+import { Check, CircleX, X } from "lucide-react";
 import { getRelativePath, getTraversalPathToFolder, resolvePath } from "../utils/output";
 import { useLiabilityConfigStore, useUIConfigStore } from "../stores";
-import { LiabilityConfig } from "../types/pages";
 import { TextEffect } from "./ui/motion-ui/text-effect";
 
 export const RunPalm: React.FC<{
@@ -27,27 +27,31 @@ export const RunPalm: React.FC<{
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    // Listen for stdout output
-    const unlistenOutput = listen<string>("process-output", (event) => {
-      setOutput((prev) => [...prev, event.payload]);
+    const unsubscribeStdout = EventsOn("stdout", (message: string) => {
+      setOutput((prev) => [...prev, message]);
     });
 
-    // Listen for stderr output
-    const unlistenError = listen<string>("process-error", (event) => {
-      setErrors((prev) => [...prev, event.payload]);
+    const unsubscribeStderr = EventsOn("stderr", (message: string) => {
+      setHadError(true);
+      setErrors((prev) => [...prev, message]);
+    });
+
+    const unsubscribeCompleted = EventsOn("commandCompleted", (message: string) => {
+      console.log(message);
+      setStatus(message);
     });
 
     // Listen for process completion
-    const unlistenFinished = listen<string[]>("process-finished", (event) => {
-      console.log(event);
-      setStatus(event.payload[0] ? event.payload[0] : null);
-    });
+    // const unlistenFinished = listen<string[]>("process-finished", (event) => {
+    //   console.log(event);
+    //   setStatus(event.payload[0] ? event.payload[0] : null);
+    // });
 
     // Cleanup listeners on unmount
     return () => {
-      unlistenOutput.then((unlisten) => unlisten());
-      unlistenError.then((unlisten) => unlisten());
-      unlistenFinished.then((unlisten) => unlisten());
+      unsubscribeStdout();
+      unsubscribeStderr();
+      unsubscribeCompleted();
     };
   }, []);
 
@@ -61,63 +65,73 @@ export const RunPalm: React.FC<{
 
   const runPalm = async () => {
     try {
-      setStatus(null);
-
       setIsLoading(true);
+      setStatus(null);
+      setErrors([]);
       setHadError(false);
 
       const pathToConfig = getTraversalPathToFolder(palmFolderPath, palmConfigPath);
       const updatedPath = ensurePalmLauncherPath(palmFolderPath);
 
-      const fileNames = await invoke<string[]>("get_file_names_in_directory", {
-        folderPath: palmConfigPath,
-      });
+      // grab all filenames inside the config folder
+      const fileNames = await GetFilenames(palmConfigPath);
       const newConfigFileName = getNextLiabilityConfigVersion(fileNames);
+      const newConfigPath = `${configPath}/${newConfigFileName}`;
 
-      await invoke("save_json_file", {
-        path: `${configPath}/${newConfigFileName}`,
-        jsonData: JSON.stringify(config, null, 2),
-      });
+      await WriteJsonFile(newConfigPath, JSON.stringify(config, null, 2));
 
-      await invoke("run_palm_exe", {
-        pathToExe: updatedPath,
-        pathToConfig,
-        liabilityConfigFilename: newConfigFileName,
-      });
+      console.log(updatedPath, pathToConfig, newConfigFileName);
 
-      if (
-        (moduleType === "valuation" ||
-          "liability_analytics" ||
-          moduleType === "risk_analytics") &&
-        palmFolderPath
-      ) {
-        const runName = config.sFileName;
-        const relativeOutputFolderToPalmFolder = config.sCashPath;
-
-        const outputFilePath = resolvePath(
-          palmFolderPath,
-          moduleType === "valuation"
-            ? `${relativeOutputFolderToPalmFolder}` // for valuation
-            : moduleType === "liability_analytics"
-            ? `${relativeOutputFolderToPalmFolder}${runName}_LiabilityOutput_Scenario_0.csv` // for liability_analytics
-            : `${relativeOutputFolderToPalmFolder}DebugInfo_Scenario_${runName}_0.csv` // for risk_analytics
-        );
-
-        // run script with this path
-        const relativeOutputFileToPythonScript = getRelativePath(
-          uiConfig.generateInputFolderPath,
-          outputFilePath
-        );
-        // console.log(relativeOutputFileToPythonScript);
-
-        await invoke("run_python_script", {
-          pathToScript: uiConfig.parseOutputPath,
-          workingDir: uiConfig.generateInputFolderPath,
-          args: [moduleType, relativeOutputFileToPythonScript, runName],
-        });
+      if (pathToConfig) {
+        await ExecutePalm(updatedPath, pathToConfig, newConfigFileName);
       }
+
+      // await invoke("save_json_file", {
+      //   path: `${configPath}/${newConfigFileName}`,
+      //   jsonData: JSON.stringify(config, null, 2),
+      // });
+
+      // await invoke("run_palm_exe", {
+      //   pathToExe: updatedPath,
+      //   pathToConfig,
+      //   liabilityConfigFilename: newConfigFileName,
+      // });
+
+      // if (
+      //   (moduleType === "valuation" ||
+      //     "liability_analytics" ||
+      //     moduleType === "risk_analytics") &&
+      //   palmFolderPath
+      // ) {
+      //   const runName = config.sFileName;
+      //   const relativeOutputFolderToPalmFolder = config.sCashPath;
+
+      //   const outputFilePath = resolvePath(
+      //     palmFolderPath,
+      //     moduleType === "valuation"
+      //       ? `${relativeOutputFolderToPalmFolder}` // for valuation
+      //       : moduleType === "liability_analytics"
+      //       ? `${relativeOutputFolderToPalmFolder}${runName}_LiabilityOutput_Scenario_0.csv` // for liability_analytics
+      //       : `${relativeOutputFolderToPalmFolder}DebugInfo_Scenario_${runName}_0.csv` // for risk_analytics
+      //   );
+
+      //   // run script with this path
+      //   const relativeOutputFileToPythonScript = getRelativePath(
+      //     uiConfig.generateInputFolderPath,
+      //     outputFilePath
+      //   );
+      //   // console.log(relativeOutputFileToPythonScript);
+
+      //   await invoke("run_python_script", {
+      //     pathToScript: uiConfig.parseOutputPath,
+      //     workingDir: uiConfig.generateInputFolderPath,
+      //     args: [moduleType, relativeOutputFileToPythonScript, runName],
+      //   });
+      // }
     } catch (err) {
       console.error(err);
+      setHadError(true);
+      setErrors((prev) => [...prev, err as string]);
     } finally {
       setIsLoading(false);
     }
@@ -139,15 +153,24 @@ export const RunPalm: React.FC<{
               {x}
             </TextEffect>
           ))}
+          {errors.map((x, i) => (
+            <TextEffect
+              key={`${x}-${i}`}
+              per="line"
+              preset="slide"
+              className="text-sm/6 text-red-500 font-light break-words whitespace-normal"
+            >
+              {x}
+            </TextEffect>
+          ))}
           <div ref={bottomRef}></div>
         </div>
       </div>
 
       <div className="flex w-full justify-center mt-4 items-center gap-x-2">
         {isLoading && <LoadingIcon />}
-        {status === "Process completed successfully" && !hadError && (
-          <Check color="green" size={30} className="" />
-        )}
+        {status === "Success" && !hadError && <Check color="green" size={30} />}
+        {hadError && <X color="red" size={30} />}
         <Button
           onClick={runPalm}
           disabled={isDisabled || !palmFolderPath || !palmConfigPath || isLoading}
