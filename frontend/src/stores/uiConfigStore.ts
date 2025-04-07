@@ -21,7 +21,6 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
     pathToRiskConfigs: "",
     pathToSAAConfigs: "",
 
-    generateInputFilePath: "",
     generateInputFolderPath: "",
     generateLiabilityConfigPath: "",
     generateSpreadAssumptionPath: "",

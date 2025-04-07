@@ -27,7 +27,6 @@ export namespace main {
 	    pathToLiabilityConfigs: string;
 	    pathToRiskConfigs: string;
 	    pathToSAAConfigs: string;
-	    generateInputFilePath: string;
 	    generateInputFolderPath: string;
 	    generateLiabilityConfigPath: string;
 	    generateSpreadAssumptionPath: string;
@@ -56,7 +55,6 @@ export namespace main {
 	        this.pathToLiabilityConfigs = source["pathToLiabilityConfigs"];
 	        this.pathToRiskConfigs = source["pathToRiskConfigs"];
 	        this.pathToSAAConfigs = source["pathToSAAConfigs"];
-	        this.generateInputFilePath = source["generateInputFilePath"];
 	        this.generateInputFolderPath = source["generateInputFolderPath"];
 	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
 	        this.generateSpreadAssumptionPath = source["generateSpreadAssumptionPath"];

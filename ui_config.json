@@ -12,7 +12,6 @@
   "pathToRiskConfigs": "../../../Configs/risk_analytics",
   "pathToSAAConfigs": "../../../Configs/SAA",
 
-  "generateInputFilePath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll",
   "generateInputFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI",
   "generateLiabilityConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateLiabilityConfig.py",
   "generateSpreadAssumptionPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateSpreadAssumption.py",

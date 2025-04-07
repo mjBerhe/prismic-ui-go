@@ -1,22 +1,23 @@
 import { useState, useEffect } from "react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
-import { invoke } from "@tauri-apps/api/core";
 import * as dfd from "danfojs/dist/danfojs-browser/src";
+import { ReadFiles } from "../../../wailsjs/go/main/App";
 
 import { cn } from "../../utils/utils";
 import { ChevronDown } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import OutputTable from "../ui/OutputTable";
 
+type Option = {
+  id: number;
+  name: string;
+  data: string[][];
+  initData: string[][];
+};
+
 type DateTypeOptions = "Monthly" | "Yearly";
 type AggregateType = "sum" | "point in time";
 const dateOptions: DateTypeOptions[] = ["Monthly", "Yearly"];
-
-type FileOption = {
-  id: number;
-  name: string;
-  values: Record<string, string[]>;
-};
 
 const amountDisplayYears = 60;
 const amountDisplayMonths = amountDisplayYears * 12;
@@ -27,37 +28,36 @@ export const LiabilityAnalyticsOutput: React.FC<{
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [fileOptions, setFileOptions] = useState<FileOption[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileOption>();
+  // const [fileOptions, setFileOptions] = useState<FileOption[]>([]);
+  const [fileOptions, setFileOptions] = useState<Option[]>([]);
+  const [selectedFile, setSelectedFile] = useState<Option>();
 
   const [monthlyDataFrame, setMonthlyDataFrame] = useState<dfd.DataFrame>();
 
-  const readOutputFiles = async (folderPath: string) => {
-    if (folderPath) {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const readOutputFiles = async (exportFolderPath: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const files = await invoke<Record<string, Record<string, string[]>>>(
-          "load_files_in_directory",
-          {
-            folderPath: folderPath,
-            filterString: "Parsed_LiabilityOutput_Scenario",
-          }
-        );
+      const csvData = await ReadFiles(
+        exportFolderPath,
+        "Parsed_LiabilityOutput_Scenario"
+      );
 
-        const fileOptions = Object.entries(files).map(([key, value], i) => ({
+      if (csvData) {
+        const options: Option[] = csvData.map((x, i) => ({
           id: i,
-          name: key,
-          values: value,
+          name: x.Name,
+          data: x.Data,
+          initData: x.Data,
         }));
-        setFileOptions(fileOptions);
-      } catch (err) {
-        setFileOptions([]);
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+        setFileOptions(options);
       }
+    } catch (error) {
+      setError(error as string);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,10 +70,11 @@ export const LiabilityAnalyticsOutput: React.FC<{
 
   // whenever an output file is selected, create a dataframe to display
   useEffect(() => {
-    const createDataFrames = (values: Record<string, string[]>) => {
-      let monthlyData = Object.entries(values).map(([key, values], i) => {
-        return [key, ...values.map(Number).slice(0, amountDisplayMonths)];
-      });
+    const createDataFrames = (values: string[][]) => {
+      let monthlyData = values.map((row) => [
+        row[0],
+        ...row.slice(1).map(Number).slice(0, amountDisplayMonths),
+      ]);
 
       const rowOrder = ["Total Cashflow", "Claims", "Expense"];
       monthlyData = monthlyData.sort(
@@ -92,7 +93,7 @@ export const LiabilityAnalyticsOutput: React.FC<{
     };
 
     if (selectedFile) {
-      createDataFrames(selectedFile.values);
+      createDataFrames(selectedFile.data);
     }
   }, [selectedFile]);
 

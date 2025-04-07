@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { GetLiabilityConfigs } from "../../wailsjs/go/main/App";
-import {
-  cleanJsonString,
-  normalizePathString,
-  resolvePath,
-  extractFileName,
-} from "../utils/output";
+import { normalizePathString, resolvePath, extractFileName } from "../utils/output";
 
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
@@ -33,49 +28,46 @@ const LiabilityAnalyics: React.FC = () => {
   const { config, configPath, setConfig, setConfigPath } = useLiabilityConfigStore();
   const { config: uiConfig } = useUIConfigStore();
 
-  const PALM_FOLDER_PATH =
-    process.env.NODE_ENV === "development"
-      ? uiConfig.palmFolderPath || import.meta.env.VITE_DEV_PALM_FOLDER_PATH
-      : uiConfig.palmFolderPath || import.meta.env.PROD_PALM_FOLDER_PATH;
+  const PALM_FOLDER_PATH = uiConfig.palmFolderPath;
+  const CONFIGS_PATH = uiConfig.pathToLiabilityConfigs;
+
+  if (!PALM_FOLDER_PATH || !CONFIGS_PATH) {
+    !error && setError("pALM folder or config folders were not found");
+  }
 
   // on mount, get default palm folder and set default config
   useEffect(() => {
     const getLiabilityConfig = async () => {
-      if (PALM_FOLDER_PATH) {
-        try {
-          setIsLoading(true);
-          setError(null);
+      try {
+        setIsLoading(true);
+        setError(null);
 
-          // setting default palm folder
-          const normalizedPalmFolderPath = normalizePathString(PALM_FOLDER_PATH);
-          setPalmFolderPath(normalizedPalmFolderPath);
+        // setting default palm folder
+        const normalizedPalmFolderPath = normalizePathString(PALM_FOLDER_PATH);
+        setPalmFolderPath(normalizedPalmFolderPath);
 
-          // finding all available configs
-          const configFolder = resolvePath(
-            normalizedPalmFolderPath,
-            uiConfig.pathToLiabilityConfigs || "../../../Configs/liability_analytics"
-          );
+        // finding all available configs
+        const configFolder = resolvePath(normalizedPalmFolderPath, CONFIGS_PATH);
 
-          const configFolderData = await GetLiabilityConfigs(configFolder);
+        const configFolderData = await GetLiabilityConfigs(configFolder);
 
-          const configOptions = configFolderData.map((item, i) => ({
-            id: i,
-            name: extractFileName(item.DirectoryName),
-            configJson: item.ConfigData,
-            path: item.DirectoryName,
-          }));
-          setConfigOptions(configOptions);
+        const configOptions = configFolderData.map((item, i) => ({
+          id: i,
+          name: extractFileName(item.DirectoryName),
+          configJson: item.ConfigData,
+          path: item.DirectoryName,
+        }));
+        setConfigOptions(configOptions);
 
-          if (configOptions[0]) {
-            setConfigPath(configOptions[0].path);
-            setConfig(configOptions[0].configJson);
-          }
-        } catch (err) {
-          setError(err as string);
-          console.error(err);
-        } finally {
-          setIsLoading(false);
+        if (configOptions[0]) {
+          setConfigPath(configOptions[0].path);
+          setConfig(configOptions[0].configJson);
         }
+      } catch (err) {
+        setError(err as string);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -83,6 +75,14 @@ const LiabilityAnalyics: React.FC = () => {
   }, []);
 
   const exportPath = config?.sCashPath && resolvePath(palmFolderPath, config.sCashPath);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <PageContainer>

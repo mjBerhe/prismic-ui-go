@@ -31,7 +31,7 @@ type Config struct {
 	PathToRiskConfigs      string `json:"pathToRiskConfigs"`
 	PathToSAAConfigs       string `json:"pathToSAAConfigs"`
 
-	GenerateInputFilePath        string `json:"generateInputFilePath"`
+	// folder paths for scripts
 	GenerateInputFolderPath      string `json:"generateInputFolderPath"`
 	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
 	GenerateSpreadAssumptionPath string `json:"generateSpreadAssumptionPath"`
