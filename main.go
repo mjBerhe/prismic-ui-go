@@ -15,6 +15,14 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
+	// Test the ExecutePythonScript function
+	// output, pyErr := app.ExecutePythonScript("C:/Users/mattberhe/pALM/prismic_ws_dll/UserInputUI/resultParser.py", "valuation", "../data_pru_03312024_output/valuation/", "Sen_0000")
+	// if pyErr != nil {
+	// 	fmt.Println("Error running Python script:", pyErr)
+	// } else {
+	// 	fmt.Println("Python script output:", output)
+	// }
+
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "prismic-ui",

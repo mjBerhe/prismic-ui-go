@@ -28,22 +28,24 @@ export type EmpowerPlanspec = {
   dblNetPricingSpread: number[];
 };
 
-export type UIConfig = {
-  palmFolderPath: string;
-  palmInputDataPath: string;
-  palmOutputDataPath: string;
-  pathToValuationConfigs: string;
-  pathToLiabilityConfigs: string;
-  pathToRiskConfigs: string;
+// export type UIConfig = {
+//   palmFolderPath: string;
+//   palmInputDataPath: string;
+//   palmOutputDataPath: string;
 
-  generateInputFilePath: string;
-  generateInputFolderPath: string;
-  generateLiabilityConfigPath: string;
-  generateSpreadAssumptionPath: string;
+//   pathToValuationConfigs: string;
+//   pathToLiabilityConfigs: string;
+//   pathToRiskConfigs: string;
+//   pathToSAAConfigs: string;
 
-  generateScenarioConfigPath: string;
-  generateScenarioPath: string;
-  scenarioConfigsPath: string;
+//   generateInputFilePath: string;
+//   generateInputFolderPath: string;
+//   generateLiabilityConfigPath: string;
+//   generateSpreadAssumptionPath: string;
 
-  parseOutputPath: string;
-};
+//   generateScenarioConfigPath: string;
+//   generateScenarioPath: string;
+//   scenarioConfigsPath: string;
+
+//   parseOutputPath: string;
+// };

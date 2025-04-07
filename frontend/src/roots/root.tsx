@@ -51,9 +51,9 @@ const palmModules: ModuleLink[] = [
   {
     name: "Strategic Asset Allocation",
     id: 4,
-    disabled: true,
-    href: "",
-    description: "",
+    disabled: false,
+    href: "/strategic-asset-allocation",
+    description: "Todo",
   },
   {
     name: "New Business Pricing",

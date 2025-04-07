@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useUIConfigStore } from "../stores";
-import { UIConfig } from "../types/pages";
 import { ReadUIConfig } from "../../wailsjs/go/main/App";
 
 export const useLoadUIConfig = () => {

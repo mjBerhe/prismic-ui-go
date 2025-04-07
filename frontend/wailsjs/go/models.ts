@@ -1,12 +1,32 @@
 export namespace main {
 	
+	export class CSVFile {
+	    Path: string;
+	    Name: string;
+	    Data: string[][];
+	
+	    static createFrom(source: any = {}) {
+	        return new CSVFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Path = source["Path"];
+	        this.Name = source["Name"];
+	        this.Data = source["Data"];
+	    }
+	}
 	export class Config {
 	    palmFolderPath: string;
 	    palmInputDataPath: string;
 	    palmOutputDataPath: string;
+	    palmSAAFolderPath: string;
+	    palmSAAInputDataPath: string;
+	    palmSAAOutputDataPath: string;
 	    pathToValuationConfigs: string;
 	    pathToLiabilityConfigs: string;
 	    pathToRiskConfigs: string;
+	    pathToSAAConfigs: string;
 	    generateInputFilePath: string;
 	    generateInputFolderPath: string;
 	    generateLiabilityConfigPath: string;
@@ -15,6 +35,8 @@ export namespace main {
 	    generateScenarioPath: string;
 	    scenarioConfigsPath: string;
 	    parseOutputPath: string;
+	    pythonParserScript: string;
+	    scriptsFolderPath: string;
 	    baseLiabilityConfigPath: string;
 	    baseSpreadAssumptionPath: string;
 	
@@ -27,9 +49,13 @@ export namespace main {
 	        this.palmFolderPath = source["palmFolderPath"];
 	        this.palmInputDataPath = source["palmInputDataPath"];
 	        this.palmOutputDataPath = source["palmOutputDataPath"];
+	        this.palmSAAFolderPath = source["palmSAAFolderPath"];
+	        this.palmSAAInputDataPath = source["palmSAAInputDataPath"];
+	        this.palmSAAOutputDataPath = source["palmSAAOutputDataPath"];
 	        this.pathToValuationConfigs = source["pathToValuationConfigs"];
 	        this.pathToLiabilityConfigs = source["pathToLiabilityConfigs"];
 	        this.pathToRiskConfigs = source["pathToRiskConfigs"];
+	        this.pathToSAAConfigs = source["pathToSAAConfigs"];
 	        this.generateInputFilePath = source["generateInputFilePath"];
 	        this.generateInputFolderPath = source["generateInputFolderPath"];
 	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
@@ -38,6 +64,8 @@ export namespace main {
 	        this.generateScenarioPath = source["generateScenarioPath"];
 	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
 	        this.parseOutputPath = source["parseOutputPath"];
+	        this.pythonParserScript = source["pythonParserScript"];
+	        this.scriptsFolderPath = source["scriptsFolderPath"];
 	        this.baseLiabilityConfigPath = source["baseLiabilityConfigPath"];
 	        this.baseSpreadAssumptionPath = source["baseSpreadAssumptionPath"];
 	    }
@@ -122,6 +150,12 @@ export namespace main {
 	    dblBeginningAssetsVM21: number;
 	    af_spread_sim: number;
 	    bForceNoLapseGMDB: boolean;
+	    SAA_1p_change: string;
+	    SAA_1p_change_asset: string[];
+	    SAA_shock: number[];
+	    SAA_parallel_change: string;
+	    SAA_parallel_change_assets: string[];
+	    SAA_parallel_shock: number[];
 	    bDeterministicD4D: boolean;
 	    bUseDFCurve: boolean;
 	    bLiabilityDetailOutput: boolean;
@@ -188,39 +222,39 @@ export namespace main {
 	    AlternativeReturn: number[];
 	    dbl_extraspread_reinv: number;
 	    ireinvest_choice: number;
-	    b_replace_initialport_by_reinvport: string;
-	    b_run_asset_cashflow: string;
+	    b_replace_initialport_by_reinvport: any;
+	    b_run_asset_cashflow: any;
 	    asset_path: string;
 	    initial_port_group: number[];
 	    reinvest_port_group: number[];
-	    bStress_Mortality: string;
+	    bStress_Mortality: any;
 	    iMortalityType: number;
-	    bstress_run: string;
+	    bstress_run: any;
 	    iOutterMortalityType: number;
 	    sExternal_liability_path: string;
-	    bDebugInformationALM: string;
-	    bRollBVInformationALM: string;
+	    bDebugInformationALM: any;
+	    bRollBVInformationALM: any;
 	    i_no_equity_sell_period: number;
 	    dbl_initial_bel: number[];
-	    bdividend_mode: string;
+	    bdividend_mode: any;
 	    dbl_bscr_level: number[];
 	    dbl_other_expense: number;
-	    bForceBIGSell: string;
-	    btax_mode: string;
-	    bload_ss_epl: string;
-	    bload_gul_epl: string;
-	    bload_oas: string;
-	    bassetrebalance: string;
+	    bForceBIGSell: any;
+	    btax_mode: any;
+	    bload_ss_epl: any;
+	    bload_gul_epl: any;
+	    bload_oas: any;
+	    bassetrebalance: any;
 	    rebalance_time_schedual: number[];
 	    irebalancefreq: number;
-	    bexclude_CLO_equity: string;
+	    bexclude_CLO_equity: any;
 	    dblswapexpense: number;
 	    dbl_libcf_scalar: number;
-	    bOnTheFlyGenerator: string;
+	    bOnTheFlyGenerator: any;
 	    sfinancialmodel_config: string;
-	    b_dividend_restrict: string;
+	    b_dividend_restrict: any;
 	    dbl_dividend_restriction_schedual: number[];
-	    b_replace_initport_modify: boolean;
+	    b_replace_initport_modify: any;
 	    reinvest_port_group_inner: number[];
 	    improve_path_m: string;
 	    improve_path_f: string;
@@ -242,14 +276,14 @@ export namespace main {
 	    iSimulationLength: number;
 	    iSimYear: number;
 	    i_use_nested_bel_period: number;
-	    bswap_optimization: string;
+	    bswap_optimization: any;
 	    dbl_inner_MaxEquityExposure: number;
 	    dbl_initial_bel_noequity: number[];
 	    reinvest_port_group_inner_noequity: number[];
-	    brebalance_sell_buy: string;
-	    b_fill_bscr_gap: string;
-	    bload_dividend_array: string;
-	    bloadtax_array: string;
+	    brebalance_sell_buy: any;
+	    b_fill_bscr_gap: any;
+	    bload_dividend_array: any;
+	    bloadtax_array: any;
 	    attributiontype_1: number;
 	    attributiontype_2: number;
 	    attributiontype_3: number;
@@ -275,26 +309,26 @@ export namespace main {
 	    sScenario_innerfile_up_liq_external: string;
 	    sScenario_innerfile_down_liq_external: string;
 	    initial_base0_bel: number[];
-	    liqshockarray: string;
+	    liqshockarray: number[];
 	    loaded_equity_bel: number[];
 	    loaded_nonequity_bel: number[];
 	    loaded_bases0_bel: number[];
-	    bload_generated_reserves: string;
+	    bload_generated_reserves: any;
 	    tax_reserve: number[];
-	    btax_reserve: string;
+	    btax_reserve: any;
 	    sScenario_innerfile_up_liq_external_shock1: string;
 	    sScenario_innerfile_down_liq_external_shock1: string;
 	    sScenario_innerfile_up_liq_external_shock2: string;
 	    sScenario_innerfile_down_liq_external_shock2: string;
 	    loaded_dividend: number[];
 	    anyuse_4_scale_sim: number;
-	    bbscr_old_rule: string;
+	    bbscr_old_rule: any;
 	    dblDiscountSpread_2: number;
-	    bexclude_hy_asset_inner: string;
+	    bexclude_hy_asset_inner: any;
 	    dbl_incentive_fee: number;
 	    dbl_alpha_pub: number;
 	    i_inner_otherexp_shockType: number;
-	    b_SBA_inner_detail: string;
+	    b_SBA_inner_detail: any;
 	    i_swap_wo_pd: number;
 	    i_std_apch_pd: number;
 	    dbl_std_apch_value: number[];
@@ -305,15 +339,15 @@ export namespace main {
 	    i_swap_fix_end: number;
 	    iuse_sim_liqratecharge_begin: number;
 	    iuse_sim_liqratecharge_end: number;
-	    b_sba_inner_incentive: string;
-	    b_grading_sens: string;
+	    b_sba_inner_incentive: any;
+	    b_grading_sens: any;
 	    ScenarioLoader: string;
-	    b_notch_down_rating: string;
+	    b_notch_down_rating: any;
 	    dbl_bma_258f_spread: number;
-	    binner_grading_fixedyears: string;
-	    bincludebidaskcost: string;
-	    bswap_sofr: string;
-	    bsofr_curve_swap: string;
+	    binner_grading_fixedyears: any;
+	    bincludebidaskcost: any;
+	    bswap_sofr: any;
+	    bsofr_curve_swap: any;
 	    sofr_outer: string;
 	    sofr_inner: string;
 	    sofr_inner_u25: string;
@@ -324,17 +358,17 @@ export namespace main {
 	    sofr_inner_liqup_d25: string;
 	    sofr_inner_liqdown_u25: string;
 	    sofr_inner_liqdown_d25: string;
-	    brun_bma_liq_size: string;
+	    brun_bma_liq_size: any;
 	    bma_liq_up_size_array: number[];
 	    bma_liq_down_size_array: number[];
 	    bnotchdown_outside: boolean;
-	    dbl_inner_bma_spreadshock: string;
+	    dbl_inner_bma_spreadshock?: number[];
 	    dbl_loc_cost: number;
 	    i_loc_period: number;
 	    dbl_dta_initial: number;
 	    dbl_tax_array: number[];
 	    dbl_bma_258f_spread_inner: number;
-	    balts_bmareturn: string;
+	    balts_bmareturn: any;
 	    iExpense_Type_inner: number;
 	    innermaxequity_0: number;
 	    reinvest_port_group_inner_adhoc1: number[];
@@ -525,6 +559,12 @@ export namespace main {
 	        this.dblBeginningAssetsVM21 = source["dblBeginningAssetsVM21"];
 	        this.af_spread_sim = source["af_spread_sim"];
 	        this.bForceNoLapseGMDB = source["bForceNoLapseGMDB"];
+	        this.SAA_1p_change = source["SAA_1p_change"];
+	        this.SAA_1p_change_asset = source["SAA_1p_change_asset"];
+	        this.SAA_shock = source["SAA_shock"];
+	        this.SAA_parallel_change = source["SAA_parallel_change"];
+	        this.SAA_parallel_change_assets = source["SAA_parallel_change_assets"];
+	        this.SAA_parallel_shock = source["SAA_parallel_shock"];
 	        this.bDeterministicD4D = source["bDeterministicD4D"];
 	        this.bUseDFCurve = source["bUseDFCurve"];
 	        this.bLiabilityDetailOutput = source["bLiabilityDetailOutput"];

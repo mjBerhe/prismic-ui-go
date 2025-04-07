@@ -2,52 +2,77 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
 type Config struct {
-	PalmFolderPath               string `json:"palmFolderPath"`
-	PalmInputDataPath            string `json:"palmInputDataPath"`
-	PalmOutputDataPath           string `json:"palmOutputDataPath"`
-	PathToValuationConfigs       string `json:"pathToValuationConfigs"`
-	PathToLiabilityConfigs       string `json:"pathToLiabilityConfigs"`
-	PathToRiskConfigs            string `json:"pathToRiskConfigs"`
+	PalmFolderPath     string `json:"palmFolderPath"`
+	PalmInputDataPath  string `json:"palmInputDataPath"`
+	PalmOutputDataPath string `json:"palmOutputDataPath"`
+
+	PalmSAAFolderPath     string `json:"palmSAAFolderPath"`
+	PalmSAAInputDataPath  string `json:"palmSAAInputDataPath"`
+	PalmSAAOutputDataPath string `json:"palmSAAOutputDataPath"`
+
+	PathToValuationConfigs string `json:"pathToValuationConfigs"`
+	PathToLiabilityConfigs string `json:"pathToLiabilityConfigs"`
+	PathToRiskConfigs      string `json:"pathToRiskConfigs"`
+	PathToSAAConfigs       string `json:"pathToSAAConfigs"`
+
 	GenerateInputFilePath        string `json:"generateInputFilePath"`
 	GenerateInputFolderPath      string `json:"generateInputFolderPath"`
 	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
 	GenerateSpreadAssumptionPath string `json:"generateSpreadAssumptionPath"`
-	GenerateScenarioConfigPath   string `json:"generateScenarioConfigPath"`
-	GenerateScenarioPath         string `json:"generateScenarioPath"`
-	ScenarioConfigsPath          string `json:"scenarioConfigsPath"`
-	ParseOutputPath              string `json:"parseOutputPath"`
-	BaseLiabilityConfigPath      string `json:"baseLiabilityConfigPath"`
-	BaseSpreadAssumptionPath     string `json:"baseSpreadAssumptionPath"`
+
+	GenerateScenarioConfigPath string `json:"generateScenarioConfigPath"`
+	GenerateScenarioPath       string `json:"generateScenarioPath"`
+	ScenarioConfigsPath        string `json:"scenarioConfigsPath"`
+
+	// scripts to parse output after pALM has been run (resultMergeScenarios.py)
+	ParseOutputPath    string `json:"parseOutputPath"`
+	PythonParserScript string `json:"pythonParserScript"`
+	ScriptsFolderPath  string `json:"scriptsFolderPath"`
+
+	BaseLiabilityConfigPath  string `json:"baseLiabilityConfigPath"`
+	BaseSpreadAssumptionPath string `json:"baseSpreadAssumptionPath"`
 }
 
 type LiabilityConfig struct {
-	SFileName                                  string          `json:"sFileName"`
-	ITimeStep                                  int             `json:"iTimeStep"`
-	ITotalScenarios                            int             `json:"iTotalScenarios"`
-	IInnerLoopScenariosNum                     int             `json:"iInnerLoopScenariosNum"`
-	SOutterLoopScenario                        string          `json:"sOutterLoopScenario"`
-	SInnerLoopScenario                         string          `json:"sInnerLoopScenario"`
-	SCashPath                                  string          `json:"sCashPath"`
-	SPlanSpecPath                              string          `json:"sPlanSpecPath"`
-	BRiskN                                     bool            `json:"bRiskN"`
-	BBasisRisk                                 bool            `json:"bBasisRisk"`
-	BSpousalContinuation                       bool            `json:"bSpousalContinuation"`
-	BSetBeginningAssetsVM21                    bool            `json:"bSetBeginningAssetsVM21"`
-	DblBeginningAssetsVM21                     float64         `json:"dblBeginningAssetsVM21"`
-	AfSpreadSim                                float64         `json:"af_spread_sim"`
-	BForceNoLapseGMDB                          bool            `json:"bForceNoLapseGMDB"`
+	SFileName               string  `json:"sFileName"`
+	ITimeStep               int     `json:"iTimeStep"`
+	ITotalScenarios         int     `json:"iTotalScenarios"`
+	IInnerLoopScenariosNum  int     `json:"iInnerLoopScenariosNum"`
+	SOutterLoopScenario     string  `json:"sOutterLoopScenario"`
+	SInnerLoopScenario      string  `json:"sInnerLoopScenario"`
+	SCashPath               string  `json:"sCashPath"`
+	SPlanSpecPath           string  `json:"sPlanSpecPath"`
+	BRiskN                  bool    `json:"bRiskN"`
+	BBasisRisk              bool    `json:"bBasisRisk"`
+	BSpousalContinuation    bool    `json:"bSpousalContinuation"`
+	BSetBeginningAssetsVM21 bool    `json:"bSetBeginningAssetsVM21"`
+	DblBeginningAssetsVM21  float64 `json:"dblBeginningAssetsVM21"`
+	AfSpreadSim             float64 `json:"af_spread_sim"`
+	BForceNoLapseGMDB       bool    `json:"bForceNoLapseGMDB"`
+
+	SAA1pChange             string    `json:"SAA_1p_change"`
+	SAA1pChangeAsset        []string  `json:"SAA_1p_change_asset"`
+	SAAShock                []float64 `json:"SAA_shock"`
+	SAAParallelChange       string    `json:"SAA_parallel_change"`
+	SAAParallelChangeAssets []string  `json:"SAA_parallel_change_assets"`
+	SAAParallelShock        []float64 `json:"SAA_parallel_shock"`
+
 	BDeterministicD4D                          bool            `json:"bDeterministicD4D"`
 	BUseDFCurve                                bool            `json:"bUseDFCurve"`
 	BLiabilityDetailOutput                     bool            `json:"bLiabilityDetailOutput"`
@@ -114,39 +139,39 @@ type LiabilityConfig struct {
 	AlternativeReturn                          []float64       `json:"AlternativeReturn"`
 	DblExtraspreadReinv                        float64         `json:"dbl_extraspread_reinv"`
 	IreinvestChoice                            int             `json:"ireinvest_choice"`
-	BReplaceInitialportByReinvport             string          `json:"b_replace_initialport_by_reinvport"`
-	BRunAssetCashflow                          string          `json:"b_run_asset_cashflow"`
+	BReplaceInitialportByReinvport             interface{}     `json:"b_replace_initialport_by_reinvport"`
+	BRunAssetCashflow                          interface{}     `json:"b_run_asset_cashflow"`
 	AssetPath                                  string          `json:"asset_path"`
 	InitialPortGroup                           []int           `json:"initial_port_group"`
 	ReinvestPortGroup                          []int           `json:"reinvest_port_group"`
-	BStressMortality                           string          `json:"bStress_Mortality"`
+	BStressMortality                           interface{}     `json:"bStress_Mortality"`
 	IMortalityType                             int             `json:"iMortalityType"`
-	BstressRun                                 string          `json:"bstress_run"`
+	BstressRun                                 interface{}     `json:"bstress_run"`
 	IOutterMortalityType                       int             `json:"iOutterMortalityType"`
 	SExternalLiabilityPath                     string          `json:"sExternal_liability_path"`
-	BDebugInformationALM                       string          `json:"bDebugInformationALM"`
-	BRollBVInformationALM                      string          `json:"bRollBVInformationALM"`
+	BDebugInformationALM                       interface{}     `json:"bDebugInformationALM"`
+	BRollBVInformationALM                      interface{}     `json:"bRollBVInformationALM"`
 	INoEquitySellPeriod                        int             `json:"i_no_equity_sell_period"`
 	DblInitialBel                              []float64       `json:"dbl_initial_bel"`
-	BdividendMode                              string          `json:"bdividend_mode"`
+	BdividendMode                              interface{}     `json:"bdividend_mode"`
 	DblBscrLevel                               []float64       `json:"dbl_bscr_level"`
 	DblOtherExpense                            float64         `json:"dbl_other_expense"`
-	BForceBIGSell                              string          `json:"bForceBIGSell"`
-	BtaxMode                                   string          `json:"btax_mode"`
-	BloadSsEpl                                 string          `json:"bload_ss_epl"`
-	BloadGulEpl                                string          `json:"bload_gul_epl"`
-	BloadOas                                   string          `json:"bload_oas"`
-	Bassetrebalance                            string          `json:"bassetrebalance"`
+	BForceBIGSell                              interface{}     `json:"bForceBIGSell"`
+	BtaxMode                                   interface{}     `json:"btax_mode"`
+	BloadSsEpl                                 interface{}     `json:"bload_ss_epl"`
+	BloadGulEpl                                interface{}     `json:"bload_gul_epl"`
+	BloadOas                                   interface{}     `json:"bload_oas"`
+	Bassetrebalance                            interface{}     `json:"bassetrebalance"`
 	RebalanceTimeSchedual                      []int           `json:"rebalance_time_schedual"`
 	Irebalancefreq                             int             `json:"irebalancefreq"`
-	BexcludeCLOEquity                          string          `json:"bexclude_CLO_equity"`
+	BexcludeCLOEquity                          interface{}     `json:"bexclude_CLO_equity"`
 	Dblswapexpense                             float64         `json:"dblswapexpense"`
 	DblLibcfScalar                             float64         `json:"dbl_libcf_scalar"`
-	BOnTheFlyGenerator                         string          `json:"bOnTheFlyGenerator"`
+	BOnTheFlyGenerator                         interface{}     `json:"bOnTheFlyGenerator"`
 	SfinancialmodelConfig                      string          `json:"sfinancialmodel_config"`
-	BDividendRestrict                          string          `json:"b_dividend_restrict"`
+	BDividendRestrict                          interface{}     `json:"b_dividend_restrict"`
 	DblDividendRestrictionSchedual             []int           `json:"dbl_dividend_restriction_schedual"`
-	BReplaceInitportModify                     bool            `json:"b_replace_initport_modify"`
+	BReplaceInitportModify                     interface{}     `json:"b_replace_initport_modify"`
 	ReinvestPortGroupInner                     []int           `json:"reinvest_port_group_inner"`
 	ImprovePathM                               string          `json:"improve_path_m"`
 	ImprovePathF                               string          `json:"improve_path_f"`
@@ -168,14 +193,14 @@ type LiabilityConfig struct {
 	ISimulationLength                          int             `json:"iSimulationLength"`
 	ISimYear                                   int             `json:"iSimYear"`
 	IUseNestedBelPeriod                        int             `json:"i_use_nested_bel_period"`
-	BswapOptimization                          string          `json:"bswap_optimization"`
+	BswapOptimization                          interface{}     `json:"bswap_optimization"`
 	DblInnerMaxEquityExposure                  float64         `json:"dbl_inner_MaxEquityExposure"`
 	DblInitialBelNoequity                      []float64       `json:"dbl_initial_bel_noequity"`
 	ReinvestPortGroupInnerNoequity             []int           `json:"reinvest_port_group_inner_noequity"`
-	BrebalanceSellBuy                          string          `json:"brebalance_sell_buy"`
-	BFillBscrGap                               string          `json:"b_fill_bscr_gap"`
-	BloadDividendArray                         string          `json:"bload_dividend_array"`
-	BloadtaxArray                              string          `json:"bloadtax_array"`
+	BrebalanceSellBuy                          interface{}     `json:"brebalance_sell_buy"`
+	BFillBscrGap                               interface{}     `json:"b_fill_bscr_gap"`
+	BloadDividendArray                         interface{}     `json:"bload_dividend_array"`
+	BloadtaxArray                              interface{}     `json:"bloadtax_array"`
 	Attributiontype1                           int             `json:"attributiontype_1"`
 	Attributiontype2                           int             `json:"attributiontype_2"`
 	Attributiontype3                           int             `json:"attributiontype_3"`
@@ -201,29 +226,29 @@ type LiabilityConfig struct {
 	SScenarioInnerfileUpLiqExternal            string          `json:"sScenario_innerfile_up_liq_external"`
 	SScenarioInnerfileDownLiqExternal          string          `json:"sScenario_innerfile_down_liq_external"`
 	InitialBase0Bel                            []float64       `json:"initial_base0_bel"`
-	Liqshockarray                              string          `json:"liqshockarray"`
+	Liqshockarray                              []float64       `json:"liqshockarray"`
 	LoadedEquityBel                            []int           `json:"loaded_equity_bel"`
 	LoadedNonequityBel                         []int           `json:"loaded_nonequity_bel"`
 	LoadedBases0Bel                            []int           `json:"loaded_bases0_bel"`
-	BloadGeneratedReserves                     string          `json:"bload_generated_reserves"`
+	BloadGeneratedReserves                     interface{}     `json:"bload_generated_reserves"`
 	TaxReserve                                 []float64       `json:"tax_reserve"`
-	BtaxReserve                                string          `json:"btax_reserve"`
+	BtaxReserve                                interface{}     `json:"btax_reserve"`
 	SScenarioInnerfileUpLiqExternalShock1      string          `json:"sScenario_innerfile_up_liq_external_shock1"`
 	SScenarioInnerfileDownLiqExternalShock1    string          `json:"sScenario_innerfile_down_liq_external_shock1"`
 	SScenarioInnerfileUpLiqExternalShock2      string          `json:"sScenario_innerfile_up_liq_external_shock2"`
 	SScenarioInnerfileDownLiqExternalShock2    string          `json:"sScenario_innerfile_down_liq_external_shock2"`
 	LoadedDividend                             []float64       `json:"loaded_dividend"`
 	Anyuse4ScaleSim                            float64         `json:"anyuse_4_scale_sim"`
-	BbscrOldRule                               string          `json:"bbscr_old_rule"`
+	BbscrOldRule                               interface{}     `json:"bbscr_old_rule"`
 	DblDiscountSpread2                         float64         `json:"dblDiscountSpread_2"`
-	BexcludeHyAssetInner                       string          `json:"bexclude_hy_asset_inner"`
+	BexcludeHyAssetInner                       interface{}     `json:"bexclude_hy_asset_inner"`
 	DblIncentiveFee                            float64         `json:"dbl_incentive_fee"`
 	DblAlphaPub                                float64         `json:"dbl_alpha_pub"`
 	IInnerOtherexpShockType                    int             `json:"i_inner_otherexp_shockType"`
-	BSBAInnerDetail                            string          `json:"b_SBA_inner_detail"`
+	BSBAInnerDetail                            interface{}     `json:"b_SBA_inner_detail"`
 	ISwapWoPd                                  int             `json:"i_swap_wo_pd"`
 	IStdApchPd                                 int             `json:"i_std_apch_pd"`
-	DblStdApchValue                            []int64         `json:"dbl_std_apch_value"`
+	DblStdApchValue                            []float64       `json:"dbl_std_apch_value"`
 	DblStdApchDur                              []float64       `json:"dbl_std_apch_dur"`
 	IFctrApchPd                                int             `json:"i_fctr_apch_pd"`
 	DblSwapFixAmt                              float64         `json:"dbl_swap_fix_amt"`
@@ -231,15 +256,15 @@ type LiabilityConfig struct {
 	ISwapFixEnd                                int             `json:"i_swap_fix_end"`
 	IuseSimLiqratechargeBegin                  int             `json:"iuse_sim_liqratecharge_begin"`
 	IuseSimLiqratechargeEnd                    int             `json:"iuse_sim_liqratecharge_end"`
-	BSbaInnerIncentive                         string          `json:"b_sba_inner_incentive"`
-	BGradingSens                               string          `json:"b_grading_sens"`
+	BSbaInnerIncentive                         interface{}     `json:"b_sba_inner_incentive"`
+	BGradingSens                               interface{}     `json:"b_grading_sens"`
 	ScenarioLoader                             string          `json:"ScenarioLoader"`
-	BNotchDownRating                           string          `json:"b_notch_down_rating"`
+	BNotchDownRating                           interface{}     `json:"b_notch_down_rating"`
 	DblBma258FSpread                           float64         `json:"dbl_bma_258f_spread"`
-	BinnerGradingFixedyears                    string          `json:"binner_grading_fixedyears"`
-	Bincludebidaskcost                         string          `json:"bincludebidaskcost"`
-	BswapSofr                                  string          `json:"bswap_sofr"`
-	BsofrCurveSwap                             string          `json:"bsofr_curve_swap"`
+	BinnerGradingFixedyears                    interface{}     `json:"binner_grading_fixedyears"`
+	Bincludebidaskcost                         interface{}     `json:"bincludebidaskcost"`
+	BswapSofr                                  interface{}     `json:"bswap_sofr"`
+	BsofrCurveSwap                             interface{}     `json:"bsofr_curve_swap"`
 	SofrOuter                                  string          `json:"sofr_outer"`
 	SofrInner                                  string          `json:"sofr_inner"`
 	SofrInnerU25                               string          `json:"sofr_inner_u25"`
@@ -250,17 +275,17 @@ type LiabilityConfig struct {
 	SofrInnerLiqupD25                          string          `json:"sofr_inner_liqup_d25"`
 	SofrInnerLiqdownU25                        string          `json:"sofr_inner_liqdown_u25"`
 	SofrInnerLiqdownD25                        string          `json:"sofr_inner_liqdown_d25"`
-	BrunBmaLiqSize                             string          `json:"brun_bma_liq_size"`
+	BrunBmaLiqSize                             interface{}     `json:"brun_bma_liq_size"`
 	BmaLiqUpSizeArray                          []float64       `json:"bma_liq_up_size_array"`
 	BmaLiqDownSizeArray                        []float64       `json:"bma_liq_down_size_array"`
 	BnotchdownOutside                          bool            `json:"bnotchdown_outside"`
-	DblInnerBmaSpreadshock                     string          `json:"dbl_inner_bma_spreadshock"`
+	DblInnerBmaSpreadshock                     *[]float64      `json:"dbl_inner_bma_spreadshock"`
 	DblLocCost                                 float64         `json:"dbl_loc_cost"`
 	ILocPeriod                                 int             `json:"i_loc_period"`
 	DblDtaInitial                              float64         `json:"dbl_dta_initial"`
 	DblTaxArray                                []float64       `json:"dbl_tax_array"`
 	DblBma258FSpreadInner                      float64         `json:"dbl_bma_258f_spread_inner"`
-	BaltsBmareturn                             string          `json:"balts_bmareturn"`
+	BaltsBmareturn                             interface{}     `json:"balts_bmareturn"`
 	IExpenseTypeInner                          int             `json:"iExpense_Type_inner"`
 	Innermaxequity0                            float64         `json:"innermaxequity_0"`
 	ReinvestPortGroupInnerAdhoc1               []int           `json:"reinvest_port_group_inner_adhoc1"`
@@ -536,7 +561,7 @@ func (a *App) GetLiabilityConfigs(folderPath string) ([]LiabilityConfigData, err
 				defer file.Close()
 
 				var config LiabilityConfig
-				config = LiabilityConfig{}
+
 				decoder := json5.NewDecoder(file)
 				decodeErr := decoder.Decode(&config)
 				if decodeErr != nil {
@@ -722,4 +747,113 @@ func (a *App) WriteJsonFile(path string, jsonData string) error {
 	}
 
 	return nil
+}
+
+type CSVFile struct {
+	Path string     // Path to the CSV file
+	Name string     // Name of the CSV file
+	Data [][]string // Parsed CSV data
+}
+
+func (a *App) ReadFiles(path string, filterString string) ([]CSVFile, error) {
+
+	var result []CSVFile
+	// CSVData represents the parsed CSV data as a slice of string slices.
+
+	err := filepath.WalkDir(path, func(fPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err // Propagate errors up the call stack
+		}
+
+		// Skip the root directory itself
+		if fPath == "." {
+			return nil
+		}
+
+		// Check if the file is a CSV and contains the filter string
+		if strings.Contains(d.Name(), filterString) && strings.HasSuffix(strings.ToLower(d.Name()), ".csv") {
+			// Parse the CSV file
+			csvData, err := parseCSVFile(fPath)
+			if err != nil {
+				fmt.Printf("Error parsing file %s: %v\n", fPath, err)
+				return nil // Skip to the next file
+			}
+
+			// Create a CSVFile struct and append it to the result
+			csvFile := CSVFile{
+				Path: fPath,
+				Name: d.Name(),
+				Data: csvData,
+			}
+			result = append(result, csvFile)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+
+}
+
+// Helper function to parse a single CSV file
+func parseCSVFile(filename string) ([][]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var buffer bytes.Buffer
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmedLine := strings.TrimRight(line, ",")
+		buffer.WriteString(trimmedLine + "\n")
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	reader := csv.NewReader(bytes.NewReader(buffer.Bytes()))
+	var data [][]string
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		data = append(data, record)
+	}
+
+	return data, nil
+}
+
+// RunPythonScript runs a Python script with the given parameters and returns its output.
+func (a *App) ExecutePythonScript(scriptPath string, params []string) (string, error) {
+	cmdParams := append([]string{scriptPath}, params...)
+	cmd := exec.Command("python", cmdParams...) // Or "python", depending on your system
+
+	// Set the working directory
+	cmd.Dir = filepath.Dir(scriptPath) // Use the directory containing the script
+
+	output, err := cmd.Output()
+	if err != nil {
+		// If the command returns an error, try to get more details
+		if exitError, ok := err.(*exec.ExitError); ok {
+			return "", fmt.Errorf("error running script: %w, stderr: %s", err, string(exitError.Stderr))
+		}
+		return "", fmt.Errorf("error running script: %w", err)
+	}
+
+	fmt.Println(string(output))
+
+	return string(output), nil
 }

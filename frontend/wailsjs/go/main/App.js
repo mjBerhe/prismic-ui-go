@@ -6,6 +6,10 @@ export function ExecutePalm(arg1, arg2, arg3) {
   return window['go']['main']['App']['ExecutePalm'](arg1, arg2, arg3);
 }
 
+export function ExecutePythonScript(arg1, arg2) {
+  return window['go']['main']['App']['ExecutePythonScript'](arg1, arg2);
+}
+
 export function GetFilenames(arg1) {
   return window['go']['main']['App']['GetFilenames'](arg1);
 }
@@ -20,6 +24,10 @@ export function Greet(arg1) {
 
 export function OpenFileDialog(arg1) {
   return window['go']['main']['App']['OpenFileDialog'](arg1);
+}
+
+export function ReadFiles(arg1, arg2) {
+  return window['go']['main']['App']['ReadFiles'](arg1, arg2);
 }
 
 export function ReadUIConfig() {

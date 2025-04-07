@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import type { UIConfig } from "../types/pages";
+import { main } from "../../wailsjs/go/models";
 
 type UIConfigStore = {
-  config: UIConfig;
-  setConfig: (config: UIConfig) => void;
+  config: main.Config;
+  setConfig: (config: main.Config) => void;
 };
 
 const useUIConfigStore = create<UIConfigStore>((set) => ({
@@ -11,17 +11,31 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
     palmFolderPath: "",
     palmInputDataPath: "",
     palmOutputDataPath: "",
+
+    palmSAAFolderPath: "",
+    palmSAAInputDataPath: "",
+    palmSAAOutputDataPath: "",
+
     pathToValuationConfigs: "",
     pathToLiabilityConfigs: "",
     pathToRiskConfigs: "",
+    pathToSAAConfigs: "",
+
     generateInputFilePath: "",
     generateInputFolderPath: "",
     generateLiabilityConfigPath: "",
     generateSpreadAssumptionPath: "",
-    parseOutputPath: "",
+
     generateScenarioConfigPath: "",
     generateScenarioPath: "",
     scenarioConfigsPath: "",
+
+    scriptsFolderPath: "",
+    parseOutputPath: "",
+    pythonParserScript: "", // new script to parse output after pALM is ran
+
+    baseLiabilityConfigPath: "",
+    baseSpreadAssumptionPath: "",
   },
   setConfig: (uiConfig) =>
     set((state) => ({

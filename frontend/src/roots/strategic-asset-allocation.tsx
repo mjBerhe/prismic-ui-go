@@ -5,10 +5,10 @@ import { extractFileName, normalizePathString, resolvePath } from "../utils/outp
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
 import { RunPalm } from "../components/runPalm";
-import { ValuationSettings } from "../components/valuation/valuationSettings";
-import { ValuationOutput } from "../components/valuation/valuationOutput";
 import { useLiabilityConfigStore, useUIConfigStore } from "../stores";
 import { main } from "../../wailsjs/go/models";
+import { SAASettings } from "../components/strategic-asset-allocation/saaSettings";
+import { SAAOutput } from "../components/strategic-asset-allocation/saaOutput";
 
 export type ConfigOption = {
   id: number;
@@ -17,7 +17,7 @@ export type ConfigOption = {
   path: string;
 };
 
-const Valuation: React.FC = () => {
+const StrategicAssetAllocation: React.FC = () => {
   // TODO: add loading and error states
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,12 @@ const Valuation: React.FC = () => {
   const { config, configPath, setConfig, setConfigPath } = useLiabilityConfigStore();
   const { config: uiConfig } = useUIConfigStore();
 
-  const PALM_FOLDER_PATH = uiConfig.palmFolderPath;
+  const PALM_FOLDER_PATH = uiConfig.palmSAAFolderPath;
+  const CONFIGS_PATH = uiConfig.pathToSAAConfigs;
+
+  if (!PALM_FOLDER_PATH || !CONFIGS_PATH) {
+    !error && setError("pALM folder or config folders were not found");
+  }
 
   // on mount, get default palm folder and set default config
   useEffect(() => {
@@ -50,10 +55,7 @@ const Valuation: React.FC = () => {
           setPalmFolderPath(normalizedPalmFolderPath);
 
           // finding all available configs
-          const configFolder = resolvePath(
-            normalizedPalmFolderPath,
-            uiConfig.pathToValuationConfigs || "../../../Configs/valuation"
-          );
+          const configFolder = resolvePath(normalizedPalmFolderPath, CONFIGS_PATH);
 
           const configFolderData = await GetLiabilityConfigs(configFolder);
 
@@ -63,6 +65,7 @@ const Valuation: React.FC = () => {
             configJson: item.ConfigData,
             path: item.DirectoryName,
           }));
+          console.log(configOptions);
           setConfigOptions(configOptions);
 
           if (configOptions[0]) {
@@ -83,15 +86,23 @@ const Valuation: React.FC = () => {
 
   const exportPath = config?.sCashPath && resolvePath(palmFolderPath, config.sCashPath);
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <PageContainer>
       <div className="py-8 flex flex-col justify-center">
-        <PageHeader title="Valuation" />
+        <PageHeader title="Strategic Asset Allocation" />
 
         <div className="flex w-full mt-8 gap-x-6">
           <div className="w-1/2 flex flex-col gap-y-8">
             {configOptions?.length > 0 && (
-              <ValuationSettings
+              <SAASettings
                 configPath={configPath}
                 palmFolderPath={palmFolderPath}
                 configOptions={configOptions}
@@ -104,7 +115,7 @@ const Valuation: React.FC = () => {
               <RunPalm
                 palmFolderPath={palmFolderPath}
                 palmConfigPath={configPath}
-                moduleType="valuation"
+                moduleType="saa"
               />
             )}
           </div>
@@ -112,7 +123,7 @@ const Valuation: React.FC = () => {
 
         <div className="mt-8">
           {exportPath && exportPath !== "/" && (
-            <ValuationOutput exportFolderPath={exportPath} />
+            <SAAOutput exportFolderPath={exportPath} />
           )}
         </div>
       </div>
@@ -120,4 +131,4 @@ const Valuation: React.FC = () => {
   );
 };
 
-export default Valuation;
+export default StrategicAssetAllocation;

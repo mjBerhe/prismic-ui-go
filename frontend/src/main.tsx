@@ -7,6 +7,7 @@ import { useLoadUIConfig } from "./hooks/useLoadUIConfig";
 import Root from "./roots/root";
 import Valuation from "./roots/valuation";
 import LiabilityAnalyics from "./roots/liability-analytics";
+import StrategicAssetAllocation from "./roots/strategic-asset-allocation";
 
 const container = document.getElementById("root");
 
@@ -52,6 +53,11 @@ const router = createBrowserRouter([
   //   element: <RiskAnalytics />,
   //   errorElement: <ErrorPage />,
   // },
+  {
+    path: "/strategic-asset-allocation",
+    element: <StrategicAssetAllocation />,
+    errorElement: <ErrorPage />,
+  },
   // {
   //   path: "/generate-inputs",
   //   element: <GenerateInputs />,
