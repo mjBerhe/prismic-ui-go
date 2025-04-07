@@ -45,39 +45,36 @@ const StrategicAssetAllocation: React.FC = () => {
   // on mount, get default palm folder and set default config
   useEffect(() => {
     const getLiabilityConfig = async () => {
-      if (PALM_FOLDER_PATH) {
-        try {
-          setIsLoading(true);
-          setError(null);
+      try {
+        setIsLoading(true);
+        setError(null);
 
-          // setting default palm folder
-          const normalizedPalmFolderPath = normalizePathString(PALM_FOLDER_PATH);
-          setPalmFolderPath(normalizedPalmFolderPath);
+        // setting default palm folder
+        const normalizedPalmFolderPath = normalizePathString(PALM_FOLDER_PATH);
+        setPalmFolderPath(normalizedPalmFolderPath);
 
-          // finding all available configs
-          const configFolder = resolvePath(normalizedPalmFolderPath, CONFIGS_PATH);
+        // finding all available configs
+        const configFolder = resolvePath(normalizedPalmFolderPath, CONFIGS_PATH);
 
-          const configFolderData = await GetLiabilityConfigs(configFolder);
+        const configFolderData = await GetLiabilityConfigs(configFolder);
 
-          const configOptions = configFolderData.map((item, i) => ({
-            id: i,
-            name: extractFileName(item.DirectoryName),
-            configJson: item.ConfigData,
-            path: item.DirectoryName,
-          }));
-          console.log(configOptions);
-          setConfigOptions(configOptions);
+        const configOptions = configFolderData.map((item, i) => ({
+          id: i,
+          name: extractFileName(item.DirectoryName),
+          configJson: item.ConfigData,
+          path: item.DirectoryName,
+        }));
+        setConfigOptions(configOptions);
 
-          if (configOptions[0]) {
-            setConfigPath(configOptions[0].path);
-            setConfig(configOptions[0].configJson);
-          }
-        } catch (err) {
-          setError(err as string);
-          console.error(err);
-        } finally {
-          setIsLoading(false);
+        if (configOptions[0]) {
+          setConfigPath(configOptions[0].path);
+          setConfig(configOptions[0].configJson);
         }
+      } catch (err) {
+        setError(err as string);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 

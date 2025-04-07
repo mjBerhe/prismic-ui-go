@@ -112,10 +112,10 @@ export const RunPalm: React.FC<{
           outputFilePath
         );
 
-        // console.log("script path:", uiConfig.pythonParserScript);
-        // console.log("param 1 - module type:", moduleType);
-        // console.log("param 2 - output file path:", relativeOutputFileToPythonScript);
-        // console.log("param 3 - run name or run id:", runName);
+        console.log("script path:", uiConfig.pythonParserScript);
+        console.log("param 1 - module type:", moduleType);
+        console.log("param 2 - output file path:", relativeOutputFileToPythonScript);
+        console.log("param 3 - run name or run id:", runName);
 
         // executing python script
         await ExecutePythonScript(uiConfig.pythonParserScript, [
@@ -137,7 +137,7 @@ export const RunPalm: React.FC<{
     <div className="flex w-full flex-col">
       <h1 className="text-xl font-semibold">Run pALM</h1>
 
-      <div className="flex flex-col min-h-[360px] pt-2-">
+      <div className="flex flex-col min-h-[360px] pt-2">
         <div className="bg-black flex flex-col overflow-y-auto h-[360px] shadow-lg px-4 py-3 mt-2 rounded-lg">
           {output.map((x, i) => (
             <TextEffect
