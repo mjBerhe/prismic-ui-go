@@ -102,7 +102,7 @@ export const RunPalm: React.FC<{
             : moduleType === "risk_analytics"
             ? `${relativeOutputFolderToPalmFolder}DebugInfo_Scenario_${runName}_0.csv` // for risk_analytics
             : moduleType === "saa"
-            ? `${relativeOutputFolderToPalmFolder}`
+            ? `${relativeOutputFolderToPalmFolder}` // for saa
             : ""
         );
 

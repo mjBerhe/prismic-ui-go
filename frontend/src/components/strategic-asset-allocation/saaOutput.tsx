@@ -42,6 +42,7 @@ export const SAAOutput: React.FC<{
           data: x.Data,
           initData: x.Data,
         }));
+        console.log(options);
         setFileOptions(options);
       }
     } catch (error) {
@@ -130,7 +131,11 @@ export const SAAOutput: React.FC<{
                       key={i}
                       className="bg-dark-700 sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                     >
-                      {header}
+                      {header === "BEL"
+                        ? "BEL at t0"
+                        : header === "Dividend"
+                        ? "PVDE at 12%"
+                        : header}
                     </th>
                   ))}
                 </tr>
@@ -143,7 +148,8 @@ export const SAAOutput: React.FC<{
                         key={j}
                         className={cn("px-6 py-4 whitespace-nowrap bg-dark-700")}
                       >
-                        {Math.round(parseFloat(value)).toLocaleString()}
+                        {(j !== 2 || i == 0) &&
+                          Math.round(parseFloat(value)).toLocaleString()}
                       </td>
                     ))}
                   </tr>
