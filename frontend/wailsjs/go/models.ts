@@ -17,6 +17,7 @@ export namespace main {
 	    }
 	}
 	export class Config {
+	    uiDirectory: string;
 	    palmFolderPath: string;
 	    palmInputDataPath: string;
 	    palmOutputDataPath: string;
@@ -27,15 +28,14 @@ export namespace main {
 	    pathToLiabilityConfigs: string;
 	    pathToRiskConfigs: string;
 	    pathToSAAConfigs: string;
+	    pythonParserScript: string;
+	    scriptsFolderPath: string;
 	    generateInputFolderPath: string;
 	    generateLiabilityConfigPath: string;
 	    generateSpreadAssumptionPath: string;
 	    generateScenarioConfigPath: string;
 	    generateScenarioPath: string;
 	    scenarioConfigsPath: string;
-	    parseOutputPath: string;
-	    pythonParserScript: string;
-	    scriptsFolderPath: string;
 	    baseLiabilityConfigPath: string;
 	    baseSpreadAssumptionPath: string;
 	
@@ -45,6 +45,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.uiDirectory = source["uiDirectory"];
 	        this.palmFolderPath = source["palmFolderPath"];
 	        this.palmInputDataPath = source["palmInputDataPath"];
 	        this.palmOutputDataPath = source["palmOutputDataPath"];
@@ -55,15 +56,14 @@ export namespace main {
 	        this.pathToLiabilityConfigs = source["pathToLiabilityConfigs"];
 	        this.pathToRiskConfigs = source["pathToRiskConfigs"];
 	        this.pathToSAAConfigs = source["pathToSAAConfigs"];
+	        this.pythonParserScript = source["pythonParserScript"];
+	        this.scriptsFolderPath = source["scriptsFolderPath"];
 	        this.generateInputFolderPath = source["generateInputFolderPath"];
 	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
 	        this.generateSpreadAssumptionPath = source["generateSpreadAssumptionPath"];
 	        this.generateScenarioConfigPath = source["generateScenarioConfigPath"];
 	        this.generateScenarioPath = source["generateScenarioPath"];
 	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
-	        this.parseOutputPath = source["parseOutputPath"];
-	        this.pythonParserScript = source["pythonParserScript"];
-	        this.scriptsFolderPath = source["scriptsFolderPath"];
 	        this.baseLiabilityConfigPath = source["baseLiabilityConfigPath"];
 	        this.baseSpreadAssumptionPath = source["baseSpreadAssumptionPath"];
 	    }

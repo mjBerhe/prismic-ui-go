@@ -11,13 +11,17 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	stdruntime "runtime"
 	"strings"
+	"syscall"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
 type Config struct {
+	UIDirectory string `json:"uiDirectory"`
+
 	PalmFolderPath     string `json:"palmFolderPath"`
 	PalmInputDataPath  string `json:"palmInputDataPath"`
 	PalmOutputDataPath string `json:"palmOutputDataPath"`
@@ -31,7 +35,10 @@ type Config struct {
 	PathToRiskConfigs      string `json:"pathToRiskConfigs"`
 	PathToSAAConfigs       string `json:"pathToSAAConfigs"`
 
-	// folder paths for scripts
+	// scripts to parse output after pALM has been run (resultMergeScenarios.py)
+	PythonParserScript string `json:"pythonParserScript"`
+	ScriptsFolderPath  string `json:"scriptsFolderPath"`
+
 	GenerateInputFolderPath      string `json:"generateInputFolderPath"`
 	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
 	GenerateSpreadAssumptionPath string `json:"generateSpreadAssumptionPath"`
@@ -39,11 +46,6 @@ type Config struct {
 	GenerateScenarioConfigPath string `json:"generateScenarioConfigPath"`
 	GenerateScenarioPath       string `json:"generateScenarioPath"`
 	ScenarioConfigsPath        string `json:"scenarioConfigsPath"`
-
-	// scripts to parse output after pALM has been run (resultMergeScenarios.py)
-	ParseOutputPath    string `json:"parseOutputPath"`
-	PythonParserScript string `json:"pythonParserScript"`
-	ScriptsFolderPath  string `json:"scriptsFolderPath"`
 
 	BaseLiabilityConfigPath  string `json:"baseLiabilityConfigPath"`
 	BaseSpreadAssumptionPath string `json:"baseSpreadAssumptionPath"`
@@ -659,6 +661,15 @@ func (a *App) ExecutePalm(path string, configPath string, configName string) err
 	// set the working directory
 	cmd.Dir = dir
 
+	// --- Start: Platform-specific code to hide window ---
+	if stdruntime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			HideWindow:    true,       // This is the crucial flag for Windows
+			CreationFlags: 0x08000000, // CREATE_NO_WINDOW - Alternative/additional flag
+		}
+	}
+	// --- End: Platform-specific code ---
+
 	// Create pipes for stdout and stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -843,6 +854,15 @@ func (a *App) ExecutePythonScript(scriptPath string, params []string) (string, e
 
 	// Set the working directory
 	cmd.Dir = filepath.Dir(scriptPath) // Use the directory containing the script
+
+	// --- Start: Platform-specific code to hide window ---
+	if stdruntime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			HideWindow:    true,       // This is the crucial flag for Windows
+			CreationFlags: 0x08000000, // CREATE_NO_WINDOW - Alternative/additional flag
+		}
+	}
+	// --- End: Platform-specific code ---
 
 	output, err := cmd.Output()
 	if err != nil {

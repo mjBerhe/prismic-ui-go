@@ -1,4 +1,6 @@
 {
+  "uiDirectory": "C:/Users/mattberhe/pALM/prismic_palm_ui",
+
   "palmFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/bin/Release/net5.0",
   "palmInputDataPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/data_pru_03312024",
   "palmOutputDataPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/data_pru_03312024_output",
@@ -12,6 +14,9 @@
   "pathToRiskConfigs": "../../../Configs/risk_analytics",
   "pathToSAAConfigs": "../../../Configs/SAA",
 
+  "scriptsFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts",
+  "pythonParserScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/resultMergeScenarios.py",
+
   "generateInputFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI",
   "generateLiabilityConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateLiabilityConfig.py",
   "generateSpreadAssumptionPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateSpreadAssumption.py",
@@ -19,10 +24,6 @@
   "generateScenarioConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/configs/config_ESG_OTF_base.json",
   "generateScenarioPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/ESG_deterministic.py",
   "scenarioConfigsPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/configs",
-
-  "scriptsFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts",
-  "parseOutputPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/resultParser.py",
-  "pythonParserScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/resultMergeScenarios.py",
 
   "baseLiabilityConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/Configs/valuation/sen_0000",
   "baseSpreadAssumptionPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/data_pru_03312024"

@@ -8,6 +8,8 @@ type UIConfigStore = {
 
 const useUIConfigStore = create<UIConfigStore>((set) => ({
   config: {
+    uiDirectory: "",
+
     palmFolderPath: "",
     palmInputDataPath: "",
     palmOutputDataPath: "",
@@ -21,6 +23,9 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
     pathToRiskConfigs: "",
     pathToSAAConfigs: "",
 
+    scriptsFolderPath: "",
+    pythonParserScript: "", // new script to parse output after pALM is ran
+
     generateInputFolderPath: "",
     generateLiabilityConfigPath: "",
     generateSpreadAssumptionPath: "",
@@ -28,10 +33,6 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
     generateScenarioConfigPath: "",
     generateScenarioPath: "",
     scenarioConfigsPath: "",
-
-    scriptsFolderPath: "",
-    parseOutputPath: "",
-    pythonParserScript: "", // new script to parse output after pALM is ran
 
     baseLiabilityConfigPath: "",
     baseSpreadAssumptionPath: "",
