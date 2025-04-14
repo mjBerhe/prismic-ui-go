@@ -9,6 +9,7 @@ import Valuation from "./roots/valuation";
 import LiabilityAnalyics from "./roots/liability-analytics";
 import StrategicAssetAllocation from "./roots/strategic-asset-allocation";
 import GenerateInputs from "./roots/generate-inputs";
+import RiskAnalytics from "./roots/risk-analytics";
 
 const container = document.getElementById("root");
 
@@ -49,11 +50,11 @@ const router = createBrowserRouter([
     element: <LiabilityAnalyics />,
     errorElement: <ErrorPage />,
   },
-  // {
-  //   path: "/risk-analytics",
-  //   element: <RiskAnalytics />,
-  //   errorElement: <ErrorPage />,
-  // },
+  {
+    path: "/risk-analytics",
+    element: <RiskAnalytics />,
+    errorElement: <ErrorPage />,
+  },
   {
     path: "/strategic-asset-allocation",
     element: <StrategicAssetAllocation />,
