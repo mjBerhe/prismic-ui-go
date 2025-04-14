@@ -37,8 +37,6 @@ export namespace main {
 	    generateScenarioConfigPath: string;
 	    generateScenarioPath: string;
 	    scenarioConfigsPath: string;
-	    baseLiabilityConfigPath: string;
-	    baseSpreadAssumptionPath: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -66,8 +64,6 @@ export namespace main {
 	        this.generateScenarioConfigPath = source["generateScenarioConfigPath"];
 	        this.generateScenarioPath = source["generateScenarioPath"];
 	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
-	        this.baseLiabilityConfigPath = source["baseLiabilityConfigPath"];
-	        this.baseSpreadAssumptionPath = source["baseSpreadAssumptionPath"];
 	    }
 	}
 	export class FileDialogOptions {

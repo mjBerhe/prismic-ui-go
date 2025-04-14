@@ -47,9 +47,6 @@ type Config struct {
 	GenerateScenarioConfigPath string `json:"generateScenarioConfigPath"`
 	GenerateScenarioPath       string `json:"generateScenarioPath"`
 	ScenarioConfigsPath        string `json:"scenarioConfigsPath"`
-
-	BaseLiabilityConfigPath  string `json:"baseLiabilityConfigPath"`
-	BaseSpreadAssumptionPath string `json:"baseSpreadAssumptionPath"`
 }
 
 type LiabilityConfig struct {

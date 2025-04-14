@@ -9,10 +9,10 @@
   "palmSAAInputDataPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_saa/data_pru_12312023",
   "palmSAAOutputDataPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_saa/data_pru_12312023_output",
 
-  "pathToValuationConfigs": "../../../Configs/valuation",
-  "pathToLiabilityConfigs": "../../../Configs/liability_analytics",
-  "pathToRiskConfigs": "../../../Configs/risk_analytics",
-  "pathToSAAConfigs": "../../../Configs/SAA",
+  "pathToValuationConfigs": "../../../../Configs/valuation",
+  "pathToLiabilityConfigs": "../../../../Configs/liability_analytics",
+  "pathToRiskConfigs": "../../../../Configs/risk_analytics",
+  "pathToSAAConfigs": "../../../../Configs/saa",
 
   "scriptsFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts",
   "pythonParserScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/resultMergeScenarios.py",
@@ -24,8 +24,5 @@
 
   "generateScenarioConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/configs/config_ESG_OTF_base.json",
   "generateScenarioPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/ESG_deterministic.py",
-  "scenarioConfigsPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/configs",
-
-  "baseLiabilityConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/Configs/valuation/sen_0000",
-  "baseSpreadAssumptionPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/data_pru_03312024"
+  "scenarioConfigsPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/ESGOnTheFly/configs"
 }

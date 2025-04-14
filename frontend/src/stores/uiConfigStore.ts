@@ -34,9 +34,6 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
     generateScenarioConfigPath: "",
     generateScenarioPath: "",
     scenarioConfigsPath: "",
-
-    baseLiabilityConfigPath: "",
-    baseSpreadAssumptionPath: "",
   },
   setConfig: (uiConfig) =>
     set((state) => ({
