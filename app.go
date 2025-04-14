@@ -36,8 +36,9 @@ type Config struct {
 	PathToSAAConfigs       string `json:"pathToSAAConfigs"`
 
 	// scripts to parse output after pALM has been run (resultMergeScenarios.py)
-	PythonParserScript string `json:"pythonParserScript"`
-	ScriptsFolderPath  string `json:"scriptsFolderPath"`
+	ScriptsFolderPath           string `json:"scriptsFolderPath"`
+	PythonParserScript          string `json:"pythonParserScript"`
+	PythonLiabilityConfigScript string `json:"pythonLiabilityConfigScript"`
 
 	GenerateInputFolderPath      string `json:"generateInputFolderPath"`
 	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
@@ -486,6 +487,11 @@ type LiabilityConfigData struct {
 	ConfigData    LiabilityConfig
 }
 
+type FileDialogOptions struct {
+	SelectDirectory  bool
+	DefaultDirectory *string
+}
+
 // App struct
 type App struct {
 	ctx context.Context
@@ -500,11 +506,6 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
 func (a *App) ReadUIConfig() (*Config, error) {
@@ -594,11 +595,6 @@ func (a *App) GetLiabilityConfigs(folderPath string) ([]LiabilityConfigData, err
 	}
 
 	return configs, nil
-}
-
-type FileDialogOptions struct {
-	SelectDirectory  bool
-	DefaultDirectory *string
 }
 
 // OpenFileDialog opens a file dialog and returns the selected file or directory path
@@ -766,47 +762,97 @@ type CSVFile struct {
 	Data [][]string // Parsed CSV data
 }
 
-func (a *App) ReadFiles(path string, filterString string) ([]CSVFile, error) {
+func (a *App) ReadFiles(path string, filterString string, walkSubdirectories bool) ([]CSVFile, error) {
 
-	var result []CSVFile
 	// CSVData represents the parsed CSV data as a slice of string slices.
+	var result []CSVFile
 
-	err := filepath.WalkDir(path, func(fPath string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err // Propagate errors up the call stack
-		}
-
-		// Skip the root directory itself
-		if fPath == "." {
-			return nil
-		}
-
-		// Check if the file is a CSV and contains the filter string
-		if strings.Contains(d.Name(), filterString) && strings.HasSuffix(strings.ToLower(d.Name()), ".csv") {
-			// Parse the CSV file
-			csvData, err := parseCSVFile(fPath)
+	// if walkSubDirectories, walk through all files and subdir recursively
+	// if false, then just read the main directory
+	if walkSubdirectories {
+		err := filepath.WalkDir(path, func(fPath string, d os.DirEntry, err error) error {
 			if err != nil {
-				fmt.Printf("Error parsing file %s: %v\n", fPath, err)
-				return nil // Skip to the next file
+				return err
 			}
 
-			// Create a CSVFile struct and append it to the result
-			csvFile := CSVFile{
-				Path: fPath,
-				Name: d.Name(),
-				Data: csvData,
+			// Skip the root directory itself
+			if fPath == "." {
+				return nil
 			}
-			result = append(result, csvFile)
+
+			fileInfo, err := processFile(fPath, d.Name(), filterString)
+			if err != nil {
+				runtime.LogErrorf(a.ctx, "Error processing file %s: %v\n", fPath, err)
+				return err
+			} else if fileInfo != nil {
+				result = append(result, *fileInfo)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return nil, err
 		}
-		return nil
-	})
 
-	if err != nil {
-		return nil, err
+		return result, nil
+	} else {
+
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			runtime.LogError(a.ctx, "Error reading directory"+err.Error())
+			return nil, err
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue // skip
+			}
+
+			fullPath := filepath.Join(path, entry.Name())
+
+			fileInfo, err := processFile(fullPath, entry.Name(), filterString)
+			if err != nil {
+				runtime.LogErrorf(a.ctx, "Error processing file %s: %v\n", fullPath, err)
+				continue
+			} else if fileInfo != nil {
+				result = append(result, *fileInfo)
+			}
+		}
+	}
+	return result, nil
+}
+
+func processFile(fPath string, fName string, filterString string) (*CSVFile, error) {
+	if !strings.HasSuffix(strings.ToLower(fName), ".csv") {
+		return nil, nil // not a csv, just skip
 	}
 
-	return result, nil
+	applyFilter := filterString != ""
+	passesFilter := true // set to true as default
 
+	if applyFilter {
+		passesFilter = strings.Contains(fName, filterString)
+	}
+
+	if !passesFilter {
+		return nil, nil // not error, just filters out
+	}
+
+	// Parse the CSV file
+	csvData, err := parseCSVFile(fPath)
+	if err != nil {
+		return nil, err // Skip to the next file
+	}
+
+	// Create a CSVFile struct and append it to the result
+	csvFile := CSVFile{
+		Path: fPath,
+		Name: fName,
+		Data: csvData,
+	}
+
+	return &csvFile, nil
 }
 
 // Helper function to parse a single CSV file

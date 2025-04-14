@@ -28,8 +28,9 @@ export namespace main {
 	    pathToLiabilityConfigs: string;
 	    pathToRiskConfigs: string;
 	    pathToSAAConfigs: string;
-	    pythonParserScript: string;
 	    scriptsFolderPath: string;
+	    pythonParserScript: string;
+	    pythonLiabilityConfigScript: string;
 	    generateInputFolderPath: string;
 	    generateLiabilityConfigPath: string;
 	    generateSpreadAssumptionPath: string;
@@ -56,8 +57,9 @@ export namespace main {
 	        this.pathToLiabilityConfigs = source["pathToLiabilityConfigs"];
 	        this.pathToRiskConfigs = source["pathToRiskConfigs"];
 	        this.pathToSAAConfigs = source["pathToSAAConfigs"];
-	        this.pythonParserScript = source["pythonParserScript"];
 	        this.scriptsFolderPath = source["scriptsFolderPath"];
+	        this.pythonParserScript = source["pythonParserScript"];
+	        this.pythonLiabilityConfigScript = source["pythonLiabilityConfigScript"];
 	        this.generateInputFolderPath = source["generateInputFolderPath"];
 	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
 	        this.generateSpreadAssumptionPath = source["generateSpreadAssumptionPath"];

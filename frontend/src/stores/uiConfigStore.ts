@@ -25,6 +25,7 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
 
     scriptsFolderPath: "",
     pythonParserScript: "", // new script to parse output after pALM is ran
+    pythonLiabilityConfigScript: "",
 
     generateInputFolderPath: "",
     generateLiabilityConfigPath: "",

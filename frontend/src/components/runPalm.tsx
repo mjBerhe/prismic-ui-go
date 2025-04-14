@@ -112,10 +112,10 @@ export const RunPalm: React.FC<{
           outputFilePath
         );
 
-        console.log("script path:", uiConfig.pythonParserScript);
-        console.log("param 1 - module type:", moduleType);
-        console.log("param 2 - output file path:", relativeOutputFileToPythonScript);
-        console.log("param 3 - run name or run id:", runName);
+        // console.log("script path:", uiConfig.pythonParserScript);
+        // console.log("param 1 - module type:", moduleType);
+        // console.log("param 2 - output file path:", relativeOutputFileToPythonScript);
+        // console.log("param 3 - run name or run id:", runName);
 
         // executing python script
         await ExecutePythonScript(uiConfig.pythonParserScript, [

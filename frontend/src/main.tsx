@@ -8,6 +8,7 @@ import Root from "./roots/root";
 import Valuation from "./roots/valuation";
 import LiabilityAnalyics from "./roots/liability-analytics";
 import StrategicAssetAllocation from "./roots/strategic-asset-allocation";
+import GenerateInputs from "./roots/generate-inputs";
 
 const container = document.getElementById("root");
 
@@ -58,11 +59,11 @@ const router = createBrowserRouter([
     element: <StrategicAssetAllocation />,
     errorElement: <ErrorPage />,
   },
-  // {
-  //   path: "/generate-inputs",
-  //   element: <GenerateInputs />,
-  //   errorElement: <ErrorPage />,
-  // },
+  {
+    path: "/generate-inputs",
+    element: <GenerateInputs />,
+    errorElement: <ErrorPage />,
+  },
 ]);
 
 root.render(

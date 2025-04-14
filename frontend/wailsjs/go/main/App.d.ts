@@ -10,11 +10,9 @@ export function GetFilenames(arg1:string):Promise<Array<string>>;
 
 export function GetLiabilityConfigs(arg1:string):Promise<Array<main.LiabilityConfigData>>;
 
-export function Greet(arg1:string):Promise<string>;
-
 export function OpenFileDialog(arg1:main.FileDialogOptions):Promise<string>;
 
-export function ReadFiles(arg1:string,arg2:string):Promise<Array<main.CSVFile>>;
+export function ReadFiles(arg1:string,arg2:string,arg3:boolean):Promise<Array<main.CSVFile>>;
 
 export function ReadUIConfig():Promise<main.Config>;
 

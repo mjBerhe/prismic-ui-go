@@ -41,7 +41,8 @@ export const LiabilityAnalyticsOutput: React.FC<{
 
       const csvData = await ReadFiles(
         exportFolderPath,
-        "Parsed_LiabilityOutput_Scenario"
+        "Parsed_LiabilityOutput_Scenario",
+        false
       );
 
       if (csvData) {

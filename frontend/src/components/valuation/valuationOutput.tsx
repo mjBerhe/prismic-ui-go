@@ -51,7 +51,7 @@ export const ValuationOutput: React.FC<{
     try {
       setIsLoading(true);
 
-      const csvData = await ReadFiles(exportFolderPath, "SBA_without_Equity");
+      const csvData = await ReadFiles(exportFolderPath, "SBA_without_Equity", false);
 
       if (csvData) {
         const options: Option[] = csvData.map((x, i) => ({

@@ -18,16 +18,12 @@ export function GetLiabilityConfigs(arg1) {
   return window['go']['main']['App']['GetLiabilityConfigs'](arg1);
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
-}
-
 export function OpenFileDialog(arg1) {
   return window['go']['main']['App']['OpenFileDialog'](arg1);
 }
 
-export function ReadFiles(arg1, arg2) {
-  return window['go']['main']['App']['ReadFiles'](arg1, arg2);
+export function ReadFiles(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ReadFiles'](arg1, arg2, arg3);
 }
 
 export function ReadUIConfig() {

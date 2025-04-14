@@ -32,7 +32,7 @@ export const SAAOutput: React.FC<{
     try {
       setIsLoading(true);
 
-      const csvData = await ReadFiles(exportFolderPath, "Parsed_");
+      const csvData = await ReadFiles(exportFolderPath, "Parsed_", false);
       console.log(csvData);
 
       if (csvData) {
