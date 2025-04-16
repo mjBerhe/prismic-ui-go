@@ -25,14 +25,12 @@ const useUIConfigStore = create<UIConfigStore>((set) => ({
 
     scriptsFolderPath: "",
     pythonParserScript: "", // new script to parse output after pALM is ran
-    pythonLiabilityConfigScript: "",
+    pythonLiabilityConfigScript: "", // script to create liability configs
+    pythonSpreadAssumptionScript: "", // script to create spread assumptions
 
     baseScenarioConfigPath: "", // base scenario ESG config file
     scenarioConfigsPath: "", // directory where the ESG config files live
     pythonGenerateScenarioScript: "", // script to create scenario files from scenario config
-
-    generateLiabilityConfigPath: "",
-    generateSpreadAssumptionPath: "",
   },
   setConfig: (uiConfig) =>
     set((state) => ({

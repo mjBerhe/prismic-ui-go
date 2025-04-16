@@ -36,17 +36,15 @@ type Config struct {
 	PathToSAAConfigs       string `json:"pathToSAAConfigs"`
 
 	// scripts to parse output after pALM has been run (resultMergeScenarios.py)
-	ScriptsFolderPath           string `json:"scriptsFolderPath"`
-	PythonParserScript          string `json:"pythonParserScript"`
-	PythonLiabilityConfigScript string `json:"pythonLiabilityConfigScript"`
+	ScriptsFolderPath            string `json:"scriptsFolderPath"`
+	PythonParserScript           string `json:"pythonParserScript"`
+	PythonLiabilityConfigScript  string `json:"pythonLiabilityConfigScript"`
+	PythonSpreadAssumptionScript string `json:"pythonSpreadAssumptionScript"`
 
 	// paths for reading/creating ESG scenario configs
 	BaseScenarioConfigPath       string `json:"baseScenarioConfigPath"`
 	ScenarioConfigsPath          string `json:"scenarioConfigsPath"`
 	PythonGenerateScenarioScript string `json:"pythonGenerateScenarioScript"`
-
-	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
-	GenerateSpreadAssumptionPath string `json:"generateSpreadAssumptionPath"`
 }
 
 type ScenarioConfig struct {

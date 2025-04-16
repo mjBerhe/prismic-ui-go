@@ -1,9 +1,11 @@
 import { useState, useEffect, Fragment } from "react";
+import { ExecutePythonScript, GetFilenames, ReadFiles } from "../../wailsjs/go/main/App";
+import { useUIConfigStore } from "../stores";
 
 import { cn } from "../utils/utils";
-import { ChevronDown } from "lucide-react";
+import { getRelativePath, normalizePathString } from "../utils/output";
+import { ChevronDown, X } from "lucide-react";
 import {
-  Input,
   Listbox,
   ListboxOption,
   ListboxOptions,
@@ -18,12 +20,8 @@ import { LoadingIcon } from "../components/svgs/LoadingIcon";
 import { Check } from "lucide-react";
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
-import { invoke } from "@tauri-apps/api/core";
-import { getRelativePath, normalizePathString } from "../utils/output";
 import { Button } from "../components/ui/Button";
-import { useUIConfigStore } from "../stores";
 import { Scenarios } from "../components/generate-inputs/scenarios";
-import { ExecutePythonScript, GetFilenames, ReadFiles } from "../../wailsjs/go/main/App";
 
 const GenerateInputs: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,7 +37,7 @@ const GenerateInputs: React.FC = () => {
   });
 
   const { config } = useUIConfigStore();
-  const { pythonLiabilityConfigScript, generateSpreadAssumptionPath, uiDirectory } =
+  const { pythonLiabilityConfigScript, pythonSpreadAssumptionScript, uiDirectory } =
     config;
 
   const runPythonScript = async () => {
@@ -48,33 +46,28 @@ const GenerateInputs: React.FC = () => {
       setError(null);
       setIsCompleted(false);
 
-      const path = `${uiDirectory}/${selectedInputFile.name}`;
-      const pythonScriptPath = normalizePathString(pythonLiabilityConfigScript);
+      const inputTemplatePath = `${uiDirectory}/${selectedInputFile.name}`;
+      const updateLiabilityConfigsScriptPath = normalizePathString(
+        pythonLiabilityConfigScript
+      );
+      const updateSpreadAssumptionPath = normalizePathString(
+        pythonSpreadAssumptionScript
+      );
 
-      console.log(`running script: ${pythonScriptPath}`);
+      // console.log(`running script: ${updateLiabilityConfigsScriptPath}`);
 
-      console.log(`${uiDirectory}/${selectedInputFile.name}`);
-      const test = await ExecutePythonScript(pythonScriptPath, [path]);
+      // creating new liability_config files based on excel template
+      await ExecutePythonScript(updateLiabilityConfigsScriptPath, [inputTemplatePath]);
 
-      // const relativeInputFiletoInputFolder = getRelativePath(
-      //   generateInputFolderPath,
-      //   `${generateInputFilePath}/${selectedInputFile.name}`
-      // );
-
-      // const runSpreadAssumption = await invoke("run_python_script", {
-      //   pathToScript: normalizePathString(generateLiabilityConfigPath),
-      //   workingDir: generateInputFolderPath,
-      //   args: [relativeInputFiletoInputFolder],
-      // });
-
-      // const runLiabilityConfig = await invoke("run_python_script", {
-      //   pathToScript: normalizePathString(generateSpreadAssumptionPath),
-      //   workingDir: generateInputFolderPath,
-      //   args: [relativeInputFiletoInputFolder],
-      // });
+      // creating new spread assumption file in input folder based on excel template
+      const output = await ExecutePythonScript(updateSpreadAssumptionPath, [
+        inputTemplatePath,
+      ]);
+      console.log("hello?", output);
 
       setIsCompleted(true);
     } catch (err) {
+      console.error(err);
       setError(err as string);
     } finally {
       setIsLoading(false);
@@ -179,8 +172,15 @@ const GenerateInputs: React.FC = () => {
                     >
                       Generate Inputs
                     </Button>
-                    {isLoading && <LoadingIcon />}
-                    {isCompleted && <Check color="green" size={30} className="" />}
+                    {isLoading ? (
+                      <LoadingIcon />
+                    ) : error ? (
+                      <X color="red" size={30} />
+                    ) : isCompleted ? (
+                      <Check color="green" size={30} />
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               </TabPanel>

@@ -17,11 +17,9 @@
   "scriptsFolderPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts",
   "pythonParserScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/resultMergeScenarios.py",
   "pythonLiabilityConfigScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/updateLiabilityConfig.py",
+  "pythonSpreadAssumptionScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/updateSpreadAssumption.py",
 
   "baseScenarioConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/ESGOnTheFly/configs/config_ESG_OTF_base.json",
   "scenarioConfigsPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/ESGOnTheFly/configs",
-  "pythonGenerateScenarioScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/ESGOnTheFly/ESG_deterministic.py",
-
-  "generateLiabilityConfigPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateLiabilityConfig.py",
-  "generateSpreadAssumptionPath": "C:/Users/mattberhe/pALM/prismic_palm_ui/prismic_ws_dll/UserInputUI/updateSpreadAssumption.py"
+  "pythonGenerateScenarioScript": "C:/Users/mattberhe/pALM/prismic_palm_ui/scripts/ESGOnTheFly/ESG_deterministic.py"
 }

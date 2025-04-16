@@ -31,11 +31,10 @@ export namespace main {
 	    scriptsFolderPath: string;
 	    pythonParserScript: string;
 	    pythonLiabilityConfigScript: string;
+	    pythonSpreadAssumptionScript: string;
 	    baseScenarioConfigPath: string;
 	    scenarioConfigsPath: string;
 	    pythonGenerateScenarioScript: string;
-	    generateLiabilityConfigPath: string;
-	    generateSpreadAssumptionPath: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -57,11 +56,10 @@ export namespace main {
 	        this.scriptsFolderPath = source["scriptsFolderPath"];
 	        this.pythonParserScript = source["pythonParserScript"];
 	        this.pythonLiabilityConfigScript = source["pythonLiabilityConfigScript"];
+	        this.pythonSpreadAssumptionScript = source["pythonSpreadAssumptionScript"];
 	        this.baseScenarioConfigPath = source["baseScenarioConfigPath"];
 	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
 	        this.pythonGenerateScenarioScript = source["pythonGenerateScenarioScript"];
-	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
-	        this.generateSpreadAssumptionPath = source["generateSpreadAssumptionPath"];
 	    }
 	}
 	export class FileDialogOptions {
