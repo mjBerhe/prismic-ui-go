@@ -14,6 +14,8 @@ export function OpenFileDialog(arg1:main.FileDialogOptions):Promise<string>;
 
 export function ReadFiles(arg1:string,arg2:string,arg3:boolean):Promise<Array<main.CSVFile>>;
 
+export function ReadScenarioConfig(arg1:string):Promise<main.ScenarioConfig>;
+
 export function ReadUIConfig():Promise<main.Config>;
 
 export function WriteJsonFile(arg1:string,arg2:string):Promise<void>;

@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useUIConfigStore } from "../../stores";
+import { main } from "../../../wailsjs/go/models";
+import {
+  ExecutePythonScript,
+  GetFilenames,
+  ReadScenarioConfig,
+  WriteJsonFile,
+} from "../../../wailsjs/go/main/App";
 
 import { cn } from "../../utils/utils";
 import { ChevronDown, Check, Plus, Minus } from "lucide-react";
@@ -16,34 +22,15 @@ import { Button } from "../ui/Button";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { normalizePathString } from "../../utils/output";
 
-type ScenarioConfig = {
-  run_id: string;
-  Extrapolation: "Flat" | "FlatForward";
-  UFROuter: number;
-  UFROuterStartMonth: number;
-  UFRInner: number;
-  UFRInnerStartMonth: number;
-  RateConvention: "ParYieldPru" | "Spot";
-  listOfInnerProjectionMonth: number[];
-  sofrSpotRate: Record<string, number>;
-  trSpotRate: Record<string, number>;
-};
+// main.ScenarioConfig is our type
 
-type InputConfig = {
-  run_id: string;
-  Extrapolation: "Flat" | "FlatForward";
-  UFROuter: number;
-  UFROuterStartMonth: number;
-  UFRInner: number;
-  UFRInnerStartMonth: number;
-  RateConvention: "ParYieldPru" | "Spot";
-  listOfInnerProjectionMonth: string;
+interface InputScenarioConfig extends main.ScenarioConfig {
   spotRates: {
     duration: string;
     sofr: string;
     tr: string;
   }[];
-};
+}
 
 const extrapolationOptions = [
   { name: "Flat", id: 0 },
@@ -62,23 +49,14 @@ const UFRInputs: {
   { name: "UFRInnerStartMonth", id: 3, inputType: "number", disabled: false },
 ];
 
-const rateConventionOptions = [
-  { name: "ParYieldPru", id: 0 },
-  { name: "Spot", id: 1 },
-];
-
 export const Scenarios: React.FC = () => {
   const { config } = useUIConfigStore();
-  const {
-    generateInputFolderPath,
-    generateScenarioConfigPath,
-    generateScenarioPath,
-    scenarioConfigsPath,
-  } = config;
+  const { baseScenarioConfigPath, pythonGenerateScenarioScript, scenarioConfigsPath } =
+    config;
 
   const [parent] = useAutoAnimate();
   const [parent2] = useAutoAnimate();
-  const [scenarioConfig, setScenarioConfig] = useState<InputConfig | null>(null);
+  const [scenarioConfig, setScenarioConfig] = useState<InputScenarioConfig | null>(null);
 
   const [spotRatesInput, setSpotRatesInput] = useState<
     {
@@ -94,33 +72,42 @@ export const Scenarios: React.FC = () => {
 
   useEffect(() => {
     const loadScenarioConfig = async () => {
-      const config = await invoke<string>("read_json_file", {
-        path: generateScenarioConfigPath,
-      });
-      const parsed: ScenarioConfig = JSON.parse(config);
-      const parsedConfig = {
-        ...parsed,
-        listOfInnerProjectionMonth: [...parsed.listOfInnerProjectionMonth]
-          .map((x) => x.toString())
-          .join(", "),
-        spotRates: Object.entries(parsed.sofrSpotRate).map(([key, value]) => ({
-          duration: key,
-          sofr: value.toString(),
-          tr: parsed.trSpotRate[key].toString(),
-        })),
-      };
+      try {
+        setIsLoading(true);
+        const config = await ReadScenarioConfig(baseScenarioConfigPath);
 
-      setSpotRatesInput(parsedConfig.spotRates);
-      setScenarioConfig(parsedConfig);
+        const parsedConfig: InputScenarioConfig = {
+          ...config,
+          // converting list of numbers into string
+          listOfInnerProjectionMonth: [...config.listOfInnerProjectionMonth]
+            .map((x) => x.toString())
+            .join(", "),
+          // converting softSpotRate into better data structure --> spotRates
+          spotRates: Object.entries(config.sofrSpotRate).map(([key, value]) => ({
+            duration: key,
+            sofr: value.toString(),
+            tr: config.trSpotRate[key].toString(),
+          })),
+        };
+
+        setSpotRatesInput(parsedConfig.spotRates);
+        setScenarioConfig(parsedConfig);
+      } catch (err) {
+        console.error(err);
+        setError(err as string);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    if (generateScenarioConfigPath) {
+    if (baseScenarioConfigPath) {
       loadScenarioConfig();
     }
-  }, [generateScenarioConfigPath]);
+  }, [baseScenarioConfigPath]);
 
+  // restricting number inputs to only allow numbers
   const handleInputChange = (
-    name: keyof ScenarioConfig,
+    name: keyof main.ScenarioConfig,
     e: React.ChangeEvent<HTMLInputElement>,
     inputType: "number" | "string"
   ) => {
@@ -147,6 +134,7 @@ export const Scenarios: React.FC = () => {
     }
   };
 
+  // when changing spot rate input
   const handleSpotRateChange = (
     index: number,
     key: "duration" | "sofr" | "tr",
@@ -181,12 +169,12 @@ export const Scenarios: React.FC = () => {
       const { spotRates, ...newConfig } = scenarioConfig;
 
       // remaking scenario config with proper types
-      const completedScenarioConfig: ScenarioConfig = {
+      const completedScenarioConfig: main.ScenarioConfig = {
         ...newConfig,
-        listOfInnerProjectionMonth: scenarioConfig.listOfInnerProjectionMonth
+        // converting string back into list of numbers
+        listOfInnerProjectionMonth: (scenarioConfig.listOfInnerProjectionMonth as string)
           .split(",")
           .map((x) => parseInt(x)),
-        // TODO
         sofrSpotRate: Object.fromEntries(
           spotRatesInput.map((item) => [item.duration, parseFloat(item.sofr)])
         ),
@@ -195,23 +183,21 @@ export const Scenarios: React.FC = () => {
         ),
       };
 
-      const fileNames = await invoke<string[]>("get_file_names_in_directory", {
-        folderPath: scenarioConfigsPath,
-      });
+      const fileNames = await GetFilenames(scenarioConfigsPath);
 
       // we first make a new config file
       const newConfigFileName = getNextScenarioConfigVersion(fileNames);
-      const newConfigFile = await invoke("save_json_file", {
-        path: `${scenarioConfigsPath}/${newConfigFileName}`,
-        jsonData: JSON.stringify(completedScenarioConfig, null, 2),
-      });
 
-      // running python script to generate scenarios
-      const run = await invoke("run_python_script", {
-        pathToScript: normalizePathString(generateScenarioPath),
-        workingDir: `${generateInputFolderPath}/ESGOnTheFly`,
-        args: [newConfigFileName],
-      });
+      // writing new scenario config file with updated fields
+      await WriteJsonFile(
+        `${scenarioConfigsPath}/${newConfigFileName}`,
+        JSON.stringify(completedScenarioConfig)
+      );
+
+      // creating scenario files with python script
+      await ExecutePythonScript(normalizePathString(pythonGenerateScenarioScript), [
+        newConfigFileName,
+      ]);
 
       setIsCompleted(true);
     } catch (err) {
@@ -221,7 +207,7 @@ export const Scenarios: React.FC = () => {
     }
   };
 
-  if (scenarioConfig === null) {
+  if (scenarioConfig === null || isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -301,43 +287,6 @@ export const Scenarios: React.FC = () => {
             </div>
           ))}
 
-        {/* <div className="flex flex-col gap-y-2">
-          <p className="text-sm/6 text-white font-medium">Rate Convention</p>
-          <Listbox
-            value={scenarioConfig?.RateConvention}
-            onChange={(val) =>
-              setScenarioConfig((prev) => prev && { ...prev, RateConvention: val })
-            }
-          >
-            <ListboxButton
-              className={cn(
-                "relative block w-full rounded-lg bg-dark-800 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white border border-dark-600",
-                "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25"
-              )}
-            >
-              {scenarioConfig?.RateConvention}
-              <ChevronDown className="pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white/60" />
-            </ListboxButton>
-            <ListboxOptions
-              anchor="bottom"
-              className={cn(
-                "relative w-[var(--button-width)] z-100 my-1 rounded-xl bg-dark-800 border border-dark-600 p-1 focus:outline-none",
-                "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0"
-              )}
-            >
-              {rateConventionOptions.map((option) => (
-                <ListboxOption
-                  key={option.id}
-                  value={option.name}
-                  className="flex cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-white/10"
-                >
-                  <p className="text-sm/6 text-white">{option.name}</p>
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
-          </Listbox>
-        </div> */}
-
         <div className="flex flex-col gap-y-2">
           <p className="text-sm/6 text-white font-medium">
             List Of Inner Projection Months
@@ -416,16 +365,6 @@ export const Scenarios: React.FC = () => {
           <div className="w-full flex justify-center cursor-pointer">
             <Plus className="w-5 h-5" onClick={handleAddSpotRateItem} />
           </div>
-
-          {/* <Input
-            value={scenarioConfig.listOfInnerProjectionMonth}
-            onChange={(e) => handleInputChange("listOfInnerProjectionMonth", e, "string")}
-            disabled={false}
-            className={cn(
-              "w-full block rounded-lg border border-dark-600 bg-dark-800 py-1.5 px-3 text-sm/6 text-white pointer-events-auto",
-              "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25 disabled:opacity-80"
-            )}
-          /> */}
         </div>
       </div>
 

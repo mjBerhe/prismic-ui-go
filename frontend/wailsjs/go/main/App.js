@@ -26,6 +26,10 @@ export function ReadFiles(arg1, arg2, arg3) {
   return window['go']['main']['App']['ReadFiles'](arg1, arg2, arg3);
 }
 
+export function ReadScenarioConfig(arg1) {
+  return window['go']['main']['App']['ReadScenarioConfig'](arg1);
+}
+
 export function ReadUIConfig() {
   return window['go']['main']['App']['ReadUIConfig']();
 }

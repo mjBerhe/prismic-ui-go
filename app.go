@@ -40,13 +40,46 @@ type Config struct {
 	PythonParserScript          string `json:"pythonParserScript"`
 	PythonLiabilityConfigScript string `json:"pythonLiabilityConfigScript"`
 
-	GenerateInputFolderPath      string `json:"generateInputFolderPath"`
+	// paths for reading/creating ESG scenario configs
+	BaseScenarioConfigPath       string `json:"baseScenarioConfigPath"`
+	ScenarioConfigsPath          string `json:"scenarioConfigsPath"`
+	PythonGenerateScenarioScript string `json:"pythonGenerateScenarioScript"`
+
 	GenerateLiabilityConfigPath  string `json:"generateLiabilityConfigPath"`
 	GenerateSpreadAssumptionPath string `json:"generateSpreadAssumptionPath"`
+}
 
-	GenerateScenarioConfigPath string `json:"generateScenarioConfigPath"`
-	GenerateScenarioPath       string `json:"generateScenarioPath"`
-	ScenarioConfigsPath        string `json:"scenarioConfigsPath"`
+type ScenarioConfig struct {
+	Asof                       string             `json:"Asof"`
+	RunID                      string             `json:"run_id"`
+	OutputPath                 string             `json:"output_path"`
+	NumberOfYears              int                `json:"NumberOfYears"`
+	NumberOfYearsInner         int                `json:"NumberOfYearsInner"`
+	MonthPerYear               int                `json:"monthPerYear"`
+	Extrapolation              string             `json:"Extrapolation"`
+	UFROuter                   float64            `json:"UFROuter"`
+	UFROuterStartMonth         int                `json:"UFROuterStartMonth"`
+	UFRInner                   float64            `json:"UFRInner"`
+	UFRInnerStartMonth         int                `json:"UFRInnerStartMonth"`
+	TenorsOfInterests          []string           `json:"TenorsOfInterests"`
+	BaseShockScenarios         []string           `json:"BaseShockScenarios"`
+	InnerShockScenarios        []string           `json:"InnerShockScenarios"`
+	DictShockedMonth           map[string]int     `json:"DictShockedMonth"`
+	RateConvention             string             `json:"RateConvention"`
+	ListOfInnerProjectionMonth interface{}        `json:"listOfInnerProjectionMonth"`
+	NumberOfYearSuperSet       int                `json:"NumberOfYearSuperSet"`
+	ShockInputFile             string             `json:"ShockInputFile"`
+	VolInputFile               string             `json:"VolInputFile"`
+	SwapInputFile              string             `json:"SwapInputFile"`
+	VolForOuter                int                `json:"VolForOuter"`
+	VolForInner                int                `json:"VolForInner"`
+	SwapForOuter               int                `json:"SwapForOuter"`
+	SwapForInner               int                `json:"SwapForInner"`
+	IfFlat                     int                `json:"ifFlat"`
+	IfReset                    int                `json:"ifReset"`
+	ResetMonth                 int                `json:"ResetMonth"`
+	SofrSpotRate               map[string]float64 `json:"sofrSpotRate"`
+	TrSpotRate                 map[string]float64 `json:"trSpotRate"`
 }
 
 type LiabilityConfig struct {
@@ -534,6 +567,27 @@ func (a *App) ReadUIConfig() (*Config, error) {
 	}
 
 	// Return the config
+	return &config, nil
+}
+
+func (a *App) ReadScenarioConfig(path string) (*ScenarioConfig, error) {
+	file, err := os.Open(path) // for read access
+
+	if err != nil {
+		runtime.LogError(a.ctx, "Error reading JSON file: "+err.Error())
+		return nil, err
+	}
+	defer file.Close() // close file after reading
+
+	var config ScenarioConfig
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		runtime.LogError(a.ctx, "Error decoding JSON: "+err.Error())
+		return nil, err
+	}
+
 	return &config, nil
 }
 

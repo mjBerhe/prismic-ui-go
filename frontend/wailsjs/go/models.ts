@@ -31,12 +31,11 @@ export namespace main {
 	    scriptsFolderPath: string;
 	    pythonParserScript: string;
 	    pythonLiabilityConfigScript: string;
-	    generateInputFolderPath: string;
+	    baseScenarioConfigPath: string;
+	    scenarioConfigsPath: string;
+	    pythonGenerateScenarioScript: string;
 	    generateLiabilityConfigPath: string;
 	    generateSpreadAssumptionPath: string;
-	    generateScenarioConfigPath: string;
-	    generateScenarioPath: string;
-	    scenarioConfigsPath: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -58,12 +57,11 @@ export namespace main {
 	        this.scriptsFolderPath = source["scriptsFolderPath"];
 	        this.pythonParserScript = source["pythonParserScript"];
 	        this.pythonLiabilityConfigScript = source["pythonLiabilityConfigScript"];
-	        this.generateInputFolderPath = source["generateInputFolderPath"];
+	        this.baseScenarioConfigPath = source["baseScenarioConfigPath"];
+	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
+	        this.pythonGenerateScenarioScript = source["pythonGenerateScenarioScript"];
 	        this.generateLiabilityConfigPath = source["generateLiabilityConfigPath"];
 	        this.generateSpreadAssumptionPath = source["generateSpreadAssumptionPath"];
-	        this.generateScenarioConfigPath = source["generateScenarioConfigPath"];
-	        this.generateScenarioPath = source["generateScenarioPath"];
-	        this.scenarioConfigsPath = source["scenarioConfigsPath"];
 	    }
 	}
 	export class FileDialogOptions {
@@ -993,6 +991,77 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	
+	export class ScenarioConfig {
+	    Asof: string;
+	    run_id: string;
+	    output_path: string;
+	    NumberOfYears: number;
+	    NumberOfYearsInner: number;
+	    monthPerYear: number;
+	    Extrapolation: string;
+	    UFROuter: number;
+	    UFROuterStartMonth: number;
+	    UFRInner: number;
+	    UFRInnerStartMonth: number;
+	    TenorsOfInterests: string[];
+	    BaseShockScenarios: string[];
+	    InnerShockScenarios: string[];
+	    DictShockedMonth: {[key: string]: number};
+	    RateConvention: string;
+	    listOfInnerProjectionMonth: any;
+	    NumberOfYearSuperSet: number;
+	    ShockInputFile: string;
+	    VolInputFile: string;
+	    SwapInputFile: string;
+	    VolForOuter: number;
+	    VolForInner: number;
+	    SwapForOuter: number;
+	    SwapForInner: number;
+	    ifFlat: number;
+	    ifReset: number;
+	    ResetMonth: number;
+	    sofrSpotRate: {[key: string]: number};
+	    trSpotRate: {[key: string]: number};
+	
+	    static createFrom(source: any = {}) {
+	        return new ScenarioConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Asof = source["Asof"];
+	        this.run_id = source["run_id"];
+	        this.output_path = source["output_path"];
+	        this.NumberOfYears = source["NumberOfYears"];
+	        this.NumberOfYearsInner = source["NumberOfYearsInner"];
+	        this.monthPerYear = source["monthPerYear"];
+	        this.Extrapolation = source["Extrapolation"];
+	        this.UFROuter = source["UFROuter"];
+	        this.UFROuterStartMonth = source["UFROuterStartMonth"];
+	        this.UFRInner = source["UFRInner"];
+	        this.UFRInnerStartMonth = source["UFRInnerStartMonth"];
+	        this.TenorsOfInterests = source["TenorsOfInterests"];
+	        this.BaseShockScenarios = source["BaseShockScenarios"];
+	        this.InnerShockScenarios = source["InnerShockScenarios"];
+	        this.DictShockedMonth = source["DictShockedMonth"];
+	        this.RateConvention = source["RateConvention"];
+	        this.listOfInnerProjectionMonth = source["listOfInnerProjectionMonth"];
+	        this.NumberOfYearSuperSet = source["NumberOfYearSuperSet"];
+	        this.ShockInputFile = source["ShockInputFile"];
+	        this.VolInputFile = source["VolInputFile"];
+	        this.SwapInputFile = source["SwapInputFile"];
+	        this.VolForOuter = source["VolForOuter"];
+	        this.VolForInner = source["VolForInner"];
+	        this.SwapForOuter = source["SwapForOuter"];
+	        this.SwapForInner = source["SwapForInner"];
+	        this.ifFlat = source["ifFlat"];
+	        this.ifReset = source["ifReset"];
+	        this.ResetMonth = source["ResetMonth"];
+	        this.sofrSpotRate = source["sofrSpotRate"];
+	        this.trSpotRate = source["trSpotRate"];
+	    }
 	}
 
 }

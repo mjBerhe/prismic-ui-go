@@ -39,12 +39,8 @@ const GenerateInputs: React.FC = () => {
   });
 
   const { config } = useUIConfigStore();
-  const {
-    pythonLiabilityConfigScript,
-    generateInputFolderPath,
-    generateSpreadAssumptionPath,
-    uiDirectory,
-  } = config;
+  const { pythonLiabilityConfigScript, generateSpreadAssumptionPath, uiDirectory } =
+    config;
 
   const runPythonScript = async () => {
     try {
