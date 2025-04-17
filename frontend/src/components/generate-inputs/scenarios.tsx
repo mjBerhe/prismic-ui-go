@@ -67,6 +67,7 @@ export const Scenarios: React.FC = () => {
   >([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGeneratingScenarios, setIsGeneratingScenarios] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
@@ -156,7 +157,7 @@ export const Scenarios: React.FC = () => {
 
   const handleGenerateScenarios = async () => {
     try {
-      setIsLoading(true);
+      setIsGeneratingScenarios(true);
       setError(null);
       setIsCompleted(false);
 
@@ -203,7 +204,7 @@ export const Scenarios: React.FC = () => {
     } catch (err) {
       setError(err as string);
     } finally {
-      setIsLoading(false);
+      setIsGeneratingScenarios(false);
     }
   };
 
@@ -369,10 +370,10 @@ export const Scenarios: React.FC = () => {
       </div>
 
       <div className="flex w-full justify-center mt-4 items-center gap-x-2">
-        <Button onClick={handleGenerateScenarios} disabled={isLoading}>
-          {isLoading ? "Generating" : "Generate Scenarios"}
+        <Button onClick={handleGenerateScenarios} disabled={isGeneratingScenarios}>
+          {isGeneratingScenarios ? "Generating" : "Generate Scenarios"}
         </Button>
-        {isLoading && <LoadingIcon />}
+        {isGeneratingScenarios && <LoadingIcon />}
         {isCompleted && <Check color="green" size={30} className="" />}
       </div>
     </div>

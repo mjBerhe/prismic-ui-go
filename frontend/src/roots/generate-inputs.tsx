@@ -54,16 +54,11 @@ const GenerateInputs: React.FC = () => {
         pythonSpreadAssumptionScript
       );
 
-      // console.log(`running script: ${updateLiabilityConfigsScriptPath}`);
-
       // creating new liability_config files based on excel template
       await ExecutePythonScript(updateLiabilityConfigsScriptPath, [inputTemplatePath]);
 
       // creating new spread assumption file in input folder based on excel template
-      const output = await ExecutePythonScript(updateSpreadAssumptionPath, [
-        inputTemplatePath,
-      ]);
-      console.log("hello?", output);
+      await ExecutePythonScript(updateSpreadAssumptionPath, [inputTemplatePath]);
 
       setIsCompleted(true);
     } catch (err) {

@@ -945,23 +945,21 @@ func parseCSVFile(filename string) ([][]string, error) {
 // RunPythonScript runs a Python script with the given parameters and returns its output.
 func (a *App) ExecutePythonScript(scriptPath string, params []string) (string, error) {
 	cmdParams := append([]string{scriptPath}, params...)
-	cmd := exec.Command("python", cmdParams...) // Or "python", depending on your system
+	cmd := exec.Command("python", cmdParams...)
 
 	// Set the working directory
 	cmd.Dir = filepath.Dir(scriptPath) // Use the directory containing the script
 
-	// --- Start: Platform-specific code to hide window ---
+	// hide terminal window from popping up in production (windows only)
 	if stdruntime.GOOS == "windows" {
 		cmd.SysProcAttr = &syscall.SysProcAttr{
 			HideWindow:    true,       // This is the crucial flag for Windows
 			CreationFlags: 0x08000000, // CREATE_NO_WINDOW - Alternative/additional flag
 		}
 	}
-	// --- End: Platform-specific code ---
 
 	output, err := cmd.Output()
 	if err != nil {
-		// If the command returns an error, try to get more details
 		if exitError, ok := err.(*exec.ExitError); ok {
 			return "", fmt.Errorf("error running script: %w, stderr: %s", err, string(exitError.Stderr))
 		}
