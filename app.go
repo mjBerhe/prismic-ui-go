@@ -811,6 +811,7 @@ type CSVFile struct {
 	Data [][]string // Parsed CSV data
 }
 
+// only reading CSV files for now
 func (a *App) ReadFiles(path string, filterString string, walkSubdirectories bool) ([]CSVFile, error) {
 
 	// CSVData represents the parsed CSV data as a slice of string slices.
@@ -925,7 +926,19 @@ func parseCSVFile(filename string) ([][]string, error) {
 	}
 
 	reader := csv.NewReader(bytes.NewReader(buffer.Bytes()))
+	reader.FieldsPerRecord = -1 // Allow variable number of fields per record
+
 	var data [][]string
+
+	header, err := reader.Read()
+	if err != nil {
+		if err == io.EOF {
+			return data, nil // Empty file
+		}
+		return nil, err
+	}
+	// expectedColumns := len(header)
+	data = append(data, header)
 
 	for {
 		record, err := reader.Read()
@@ -933,6 +946,7 @@ func parseCSVFile(filename string) ([][]string, error) {
 			break
 		}
 		if err != nil {
+			fmt.Println("error:", err)
 			return nil, err
 		}
 
@@ -970,3 +984,66 @@ func (a *App) ExecutePythonScript(scriptPath string, params []string) (string, e
 
 	return string(output), nil
 }
+
+// copy a file into the user's download folder and return this new download path
+func (a *App) CopyFileToDownloads(sourcePath string, downloadFileName string) (path string, err error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	downloadsPath := filepath.Join(homeDir, "Downloads", downloadFileName)
+
+	srcFile, err := os.Open(sourcePath)
+	if err != nil {
+		return "", err
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(downloadsPath)
+	if err != nil {
+		return "", err
+	}
+	defer dstFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return "", err
+	}
+
+	return downloadsPath, nil
+}
+
+func (a *App) OpenFile(filePath string) {
+	fileURL := "file://" + filepath.ToSlash(filePath)
+	runtime.BrowserOpenURL(a.ctx, fileURL)
+}
+
+// ServeCSVDownload will serve the specified CSV file as a download.
+// func (a *App) ServeCSVDownload(filePath string, response http.ResponseWriter, request *http.Request) {
+// 	// Security: Sanitize the file path to prevent directory traversal attacks.
+// 	// You might want to restrict the allowed paths based on your application's needs.
+// 	absPath, err := filepath.Abs(filePath)
+// 	if err != nil {
+// 		runtime.LogError(a.ctx, "Error getting absolute path: "+err.Error())
+// 		response.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	// Check if the file exists
+// 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+// 		runtime.LogError(a.ctx, "File not found: "+absPath)
+// 		response.WriteHeader(http.StatusNotFound)
+// 		return
+// 	}
+
+// 	// Set the Content-Disposition header to force download
+// 	response.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(absPath))
+
+// 	// Set the Content-Type header (you might need to adjust this based on your needs)
+// 	response.Header().Set("Content-Type", "text/csv")
+
+// 	// Stream the file content to the response writer
+// 	http.ServeFile(response, request, absPath)
+
+// 	runtime.LogInfof(a.ctx, "Served file for download: "+absPath)
+// }

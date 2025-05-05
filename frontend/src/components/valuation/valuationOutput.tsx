@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ReadFiles } from "../../../wailsjs/go/main/App";
+import { CopyFileToDownloads, OpenFile, ReadFiles } from "../../../wailsjs/go/main/App";
 import useCSVDownloader from "../../hooks/useCSVDownloader";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { invoke } from "@tauri-apps/api/core";
@@ -7,6 +7,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { cn } from "../../utils/utils";
 import { ChevronDown } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { useUIConfigStore } from "../../stores";
+import { toast, Toaster, useSonner } from "sonner";
 
 type Option = {
   id: number;
@@ -28,16 +30,20 @@ const downloadTypeOptions: EquityOption[] = [
 export const ValuationOutput: React.FC<{
   exportFolderPath: string | null;
 }> = ({ exportFolderPath }) => {
+  const { config } = useUIConfigStore();
+  const { toasts } = useSonner();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isDownloadLoading, setIsDownloadLoading] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [fileOptions, setFileOptions] = useState<Option[]>([]);
   const [selectedFile, setSelectedFile] = useState<Option>();
 
   const [downloadType, setDownloadType] = useState<EquityOption>(downloadTypeOptions[0]);
+  const [downloadedFilePath, setDownloadedFilePath] = useState<string>("");
 
-  const { downloadCSV, isDownloading } = useCSVDownloader();
+  // const { downloadCSV, isDownloading } = useCSVDownloader();
 
   const selectedOutputFileName = selectedFile?.name.substring(
     selectedFile.name.indexOf("SBA_without_Equity_") + "SBA_without_Equity_".length,
@@ -50,11 +56,10 @@ export const ValuationOutput: React.FC<{
   const readFiles = async (exportFolderPath: string) => {
     try {
       setIsLoading(true);
+      const csvDataFiles = await ReadFiles(exportFolderPath, "SBA_without_Equity", false);
 
-      const csvData = await ReadFiles(exportFolderPath, "SBA_without_Equity", false);
-
-      if (csvData) {
-        const options: Option[] = csvData.map((x, i) => ({
+      if (csvDataFiles) {
+        const options: Option[] = csvDataFiles.map((x, i) => ({
           id: i,
           name: x.Name,
           data: x.Data[1] ? x.Data[1] : [], // data is in second row of csv file
@@ -76,49 +81,39 @@ export const ValuationOutput: React.FC<{
     }
   }, [exportFolderPath]);
 
-  // download raw monthly equity/noequity files
-  // need to make sure Combined_Scenario file exists, which is created with resultParser.py
-  const handleCreateExcelFile = async () => {
+  const handleDownloadCSV = async () => {
     try {
-      setIsDownloadLoading(true);
-      setError(null);
+      setIsDownloading(true);
 
+      // either the equity or noequity file depending on selected filter
       const fileName = `Combined_Scenario_${selectedOutputFileName}_nestedinner_${
         downloadType.name === "Equity" ? "equity" : "noequity"
       }.csv`;
+      const srcFilePath = `${config.palmOutputDataPath}/valuation/${fileName}`;
 
-      const filePath = `${
-        exportFolderPath?.endsWith("/") ? exportFolderPath : exportFolderPath + "/"
-      }${fileName}`;
+      const newPath = await CopyFileToDownloads(srcFilePath, fileName);
+      const toastId = toast(
+        <div className="bg-black text-white">
+          <span>Download Complete</span>
+          <button onClick={() => toast.dismiss()}>X</button>
+        </div>,
+        { duration: Infinity }
+      );
+      setDownloadedFilePath(newPath);
 
-      const csvContent = await invoke<string>("read_csv", { filePath });
-
-      // Preserve formatting and create a downloadable file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = fileName;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      setError(error as string);
-      console.error("Error reading CSV file:", error);
+      // await OpenFile(newPath);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setIsDownloadLoading(false);
+      setIsDownloading(false);
     }
-  };
 
-  const handleDownloadCSV = () => {
-    selectedFile?.initData && downloadCSV(selectedFile.initData);
+    // selectedFile?.initData && downloadCSV(selectedFile.initData);
   };
 
   return (
     <div className="flex flex-col">
+      <Toaster position="top-right" />
       <div className="flex flex-col items-center w-full gap-y-2">
         <div className="flex w-full">
           <h1 className="text-xl font-semibold">SBA BEL</h1>
@@ -205,13 +200,24 @@ export const ValuationOutput: React.FC<{
             </Listbox>
 
             <Button
-              className=""
-              disabled={!exportFolderPath || !selectedOutputFileName || isDownloadLoading}
+              disabled={!exportFolderPath || !selectedOutputFileName || isDownloading}
               onClick={handleDownloadCSV}
             >
               Download Monthly BEL
             </Button>
           </div>
+
+          {/* {downloadedFilePath && (
+            <div className="fixed top-4 right-4 bg-green-600 text-white p-3 rounded shadow-lg">
+              ✅ Download complete: <strong>{downloadedFilePath}</strong> <br />
+              <button
+                onClick={void OpenFile(downloadedFilePath)}
+                className="mt-2 underline text-white"
+              >
+                Open File
+              </button>
+            </div>
+          )} */}
         </div>
       </div>
 
