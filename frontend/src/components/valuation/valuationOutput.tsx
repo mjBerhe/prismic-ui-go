@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { CopyFileToDownloads, OpenFile, ReadFiles } from "../../../wailsjs/go/main/App";
-import useCSVDownloader from "../../hooks/useCSVDownloader";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
-import { invoke } from "@tauri-apps/api/core";
 
 import { cn } from "../../utils/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useUIConfigStore } from "../../stores";
-import { toast, Toaster, useSonner } from "sonner";
+import { toast, Toaster } from "sonner";
 
 type Option = {
   id: number;
@@ -31,7 +29,6 @@ export const ValuationOutput: React.FC<{
   exportFolderPath: string | null;
 }> = ({ exportFolderPath }) => {
   const { config } = useUIConfigStore();
-  const { toasts } = useSonner();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
@@ -41,9 +38,6 @@ export const ValuationOutput: React.FC<{
   const [selectedFile, setSelectedFile] = useState<Option>();
 
   const [downloadType, setDownloadType] = useState<EquityOption>(downloadTypeOptions[0]);
-  const [downloadedFilePath, setDownloadedFilePath] = useState<string>("");
-
-  // const { downloadCSV, isDownloading } = useCSVDownloader();
 
   const selectedOutputFileName = selectedFile?.name.substring(
     selectedFile.name.indexOf("SBA_without_Equity_") + "SBA_without_Equity_".length,
@@ -91,24 +85,29 @@ export const ValuationOutput: React.FC<{
       }.csv`;
       const srcFilePath = `${config.palmOutputDataPath}/valuation/${fileName}`;
 
+      // copies selected file to download folder
       const newPath = await CopyFileToDownloads(srcFilePath, fileName);
-      const toastId = toast(
-        <div className="bg-black text-white">
-          <span>Download Complete</span>
-          <button onClick={() => toast.dismiss()}>X</button>
-        </div>,
-        { duration: Infinity }
-      );
-      setDownloadedFilePath(newPath);
 
-      // await OpenFile(newPath);
+      // pops up toaster to let user open the new "downloaded" file
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-semibold">Download complete</span>
+          <span className="text-sm text-gray-500">{fileName}</span>
+        </div>,
+        {
+          duration: 8000,
+          className: "bg-gray-700 dark:text-white",
+          action: {
+            label: "Open",
+            onClick: () => OpenFile(newPath),
+          },
+        }
+      );
     } catch (err) {
       console.error(err);
     } finally {
       setIsDownloading(false);
     }
-
-    // selectedFile?.initData && downloadCSV(selectedFile.initData);
   };
 
   return (
@@ -206,18 +205,6 @@ export const ValuationOutput: React.FC<{
               Download Monthly BEL
             </Button>
           </div>
-
-          {/* {downloadedFilePath && (
-            <div className="fixed top-4 right-4 bg-green-600 text-white p-3 rounded shadow-lg">
-              ✅ Download complete: <strong>{downloadedFilePath}</strong> <br />
-              <button
-                onClick={void OpenFile(downloadedFilePath)}
-                className="mt-2 underline text-white"
-              >
-                Open File
-              </button>
-            </div>
-          )} */}
         </div>
       </div>
 
