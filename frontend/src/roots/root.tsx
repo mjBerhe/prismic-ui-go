@@ -53,7 +53,8 @@ const palmModules: ModuleLink[] = [
     id: 4,
     disabled: false,
     href: "/strategic-asset-allocation",
-    description: "Todo",
+    description:
+      "Run pALM to model the impact of PVDE and TAR under different Strategic Asset Allocations",
   },
   {
     name: "New Business Pricing",
